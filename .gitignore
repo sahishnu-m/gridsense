@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Generated locally (see README to regenerate)
+sample_data/
+gridsense_model.pkl
+
+# OS
+.DS_Store
+Thumbs.db

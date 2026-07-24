@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GridSense . Pitch Deck</title>
+<style>
+/* =========================================================================
+   GridSense pitch deck, third pass: same Apple-style light language, more
+   substance per slide plus five new ones (technical deep dive, the
+   synthetic-data story, a full dashboard mockup, a straight comparison
+   table, and an FAQ) so the deck stands on its own without narration.
+
+   Palette is unchanged from demo.html's own tokens, still deliberately
+   single-theme for the reasons noted there. System fonts only.
+   ========================================================================= */
+:root{
+  --bg:#FFFFFF; --band:#F5F5F7; --card:#FFFFFF; --line:#D2D2D7;
+  --ink:#1D1D1F; --muted:#6E6E73; --faint:#86868B;
+  --blue:#0A66E0; --blue-press:#0A57BE;
+  --ok:#157F45; --warn:#8A5A00; --crit:#CF2436;
+  --ok-v:#30C070; --warn-v:#F5A623; --crit-v:#FF5A48;
+  --screen:#0E0E10; --screen-line:#26262A;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,"Helvetica Neue",Arial,sans-serif;
+  --mono:"SF Mono","Cascadia Code",ui-monospace,"Segoe UI Mono",Consolas,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --chromeH:59px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3{letter-spacing:-.025em;text-wrap:balance}
+::selection{background:var(--blue);color:#fff}
+button{font:inherit;color:inherit;background:none;border:none}
+a{color:inherit}
+
+/* ---------------------------------------------------------------- chrome */
+.rail{position:fixed;top:0;left:0;right:0;height:3px;background:var(--line);z-index:50}
+.rail-fill{height:100%;width:100%;background:var(--blue);transform-origin:0 0;transform:scaleX(0);transition:transform .5s var(--ease)}
+
+.nav{position:fixed;top:3px;left:0;right:0;height:56px;z-index:50;background:rgba(255,255,255,.78);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1180px;margin:0 auto;height:100%;padding:0 clamp(1.25rem,4vw,2.5rem);display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:640;font-size:1.02rem;letter-spacing:-.01em}
+.logo b{color:var(--blue);font-weight:640}
+.nav-right{display:flex;align-items:center;gap:.9rem}
+.idx{font-family:var(--mono);font-size:.78rem;color:var(--faint);font-variant-numeric:tabular-nums}
+.idx em{font-style:normal;color:var(--ink)}
+.iconbtn{width:32px;height:32px;border-radius:50%;background:var(--band);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .18s var(--ease),color .18s var(--ease)}
+.iconbtn:hover{background:var(--line);color:var(--ink)}
+.iconbtn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.iconbtn:disabled{opacity:.35;cursor:default}
+.iconbtn:disabled:hover{background:var(--band);color:var(--muted)}
+.fs-link{font-size:.82rem;color:var(--blue);cursor:pointer;white-space:nowrap}
+.fs-link:hover{text-decoration:underline}
+.fs-link:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media (max-width:640px){.fs-link{display:none}}
+
+/* ---------------------------------------------------------------- shell */
+.deck{position:fixed;left:0;right:0;bottom:0;top:var(--chromeH);overflow:hidden}
+.track{position:absolute;inset:0;width:100%;transition:transform .65s var(--ease);will-change:transform}
+.slide{
+  position:relative;width:100vw;height:calc(100vh - var(--chromeH));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:clamp(1.6rem,4.5vw,3.2rem) clamp(1.5rem,6vw,5rem);
+  overflow:hidden;text-align:center;
+}
+.slide.left{align-items:flex-start;text-align:left}
+.slide.dense{justify-content:flex-start;padding-top:clamp(2.2rem,7vh,4rem)}
+.wrap{width:100%;max-width:1140px}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.82rem;font-weight:600;color:var(--blue);
+  background:rgba(10,102,224,.09);border-radius:999px;padding:.35rem .85rem;
+  margin-bottom:1.2rem;
+}
+.slide h2{font-size:clamp(1.7rem,3.7vw,2.7rem);font-weight:660;line-height:1.1;max-width:22ch}
+.slide.left h2{margin-left:0}
+.lede{font-size:clamp(.98rem,1.5vw,1.12rem);color:var(--muted);max-width:66ch;margin-top:.95rem;line-height:1.55;font-weight:420}
+.slide.left .lede{margin-left:0}
+.fineprint{font-size:.78rem;color:var(--faint);margin-top:1.2rem;max-width:64ch;line-height:1.5}
+.slide.left .fineprint{margin-left:0}
+
+@media (prefers-reduced-motion:reduce){
+  .track{transition:none}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important}
+}
+
+/* =========================================================== SLIDE . hero */
+.hero-eyebrow{font-size:.82rem;font-weight:600;color:var(--faint);letter-spacing:.02em;margin-bottom:1.5rem}
+.h1{font-size:clamp(2.2rem,5.6vw,4.2rem);font-weight:680;line-height:1.05;max-width:16ch;margin:0 auto}
+.h1 br{display:block}
+.h0-sub{font-size:clamp(1rem,1.7vw,1.25rem);color:var(--muted);max-width:46ch;margin:1.1rem auto 0;line-height:1.5;font-weight:420}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.5rem;background:var(--blue);color:#fff;
+  border-radius:999px;padding:.8rem 1.7rem;font-weight:560;font-size:1rem;
+  cursor:pointer;margin-top:1.7rem;transition:background .2s var(--ease),transform .2s var(--ease);
+}
+.btn-primary:hover{background:var(--blue-press);transform:translateY(-1px)}
+.btn-primary:focus-visible{outline:3px solid #B7D3FA;outline-offset:2px}
+.h0-fine{font-size:.8rem;color:var(--faint);margin-top:.8rem}
+
+.stickers{display:flex;justify-content:center;align-items:center;gap:.35rem;margin-top:clamp(1.6rem,4vh,2.4rem);flex-wrap:wrap}
+.sticker{background:#fff;border-radius:20px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 10px 24px rgba(0,0,0,.09);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.85rem;position:relative}
+.sticker.round{border-radius:999px}
+.st-mic{width:78px;height:78px;color:var(--blue);transform:rotate(-7deg)}
+.st-score{width:86px;height:86px;transform:rotate(4deg)}
+.st-score .n{font-family:var(--mono);font-weight:700;font-size:1.5rem;color:var(--ok)}
+.st-score .l{font-size:.56rem;color:var(--faint);margin-top:.1rem}
+.st-wave{width:100px;height:78px;transform:rotate(-3deg)}
+.st-offline{padding:.7rem 1rem;transform:rotate(6deg);flex-direction:row;gap:.45rem}
+.st-offline i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.st-offline span{font-size:.8rem;font-weight:600;color:var(--ink);white-space:nowrap}
+.st-wrench{width:78px;height:78px;color:var(--warn);transform:rotate(5deg)}
+@media (max-width:760px){.stickers{gap:.5rem}}
+
+/* =========================================================== problem grid */
+.left-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:clamp(1.6rem,3.5vh,2.2rem);width:100%}
+@media (max-width:900px){.left-grid{grid-template-columns:repeat(2,1fr)}}
+.left-cell{background:#fff;padding:1.25rem 1.1rem;display:flex;flex-direction:column;align-items:flex-start;gap:.55rem}
+.left-cell svg{width:24px;height:24px;color:var(--blue)}
+.left-cell span{font-weight:600;font-size:.92rem}
+
+/* =========================================================== how it works */
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.25rem,3.5vw,2.25rem);width:100%;margin-top:clamp(1.7rem,4vh,2.3rem);text-align:left}
+@media (max-width:820px){.how-grid{grid-template-columns:1fr}}
+.hw .n{font-family:var(--mono);font-size:.82rem;color:var(--blue);font-weight:600}
+.hw h3{font-size:1.18rem;font-weight:640;margin:.45rem 0 .4rem}
+.hw p{color:var(--muted);font-size:.92rem;line-height:1.5}
+
+/* =========================================================== pipeline (technical) */
+.pipe-row{display:flex;align-items:stretch;gap:0;width:100%;margin-top:clamp(1.6rem,3.5vh,2.2rem)}
+.pipe-node{flex:1;background:#fff;border:1px solid var(--line);border-radius:14px;padding:1rem 1rem}
+.pipe-node .n{font-family:var(--mono);font-size:.64rem;color:var(--blue);letter-spacing:.07em;margin-bottom:.4rem;text-transform:uppercase}
+.pipe-node .t{font-weight:630;font-size:.92rem;color:var(--ink)}
+.pipe-node .d{font-family:var(--mono);font-size:.68rem;color:var(--faint);margin-top:.4rem;line-height:1.5}
+.pipe-arrow{flex:none;width:clamp(14px,2.4vw,28px);display:flex;align-items:center;justify-content:center;color:var(--line)}
+@media (max-width:1000px){.pipe-row{flex-direction:column;gap:.5rem}.pipe-arrow{width:100%;height:16px;transform:rotate(90deg)}}
+
+/* =========================================================== synthetic data */
+.synth-row{display:flex;gap:1rem;width:100%;margin-top:clamp(1.6rem,3.5vh,2.2rem);flex-wrap:wrap}
+.synth-card{flex:1;min-width:200px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.25rem;text-align:left}
+.synth-card .t{font-weight:630;font-size:.98rem;color:var(--ink)}
+.synth-card .d{color:var(--muted);font-size:.86rem;margin-top:.4rem;line-height:1.5}
+
+/* =========================================================== live demo */
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;width:100%;margin-top:clamp(1.6rem,3.5vh,2.1rem);text-align:left}
+@media (max-width:980px){.cards3{grid-template-columns:1fr;max-width:420px;margin-inline:auto}}
+.vcard{background:#fff;border:1px solid var(--line);border-radius:20px;padding:1.15rem;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.05)}
+.vscreen{background:var(--screen);border-radius:12px;padding:.55rem;margin-bottom:.9rem}
+canvas.scope{width:100%;height:48px;display:block;border-radius:6px}
+.vcard-top{display:flex;align-items:center;gap:.5rem}
+.vcard-dot{width:9px;height:9px;border-radius:50%}
+.vcard-status{font-weight:640;font-size:1rem;letter-spacing:-.01em}
+.vcard-read{color:var(--muted);font-size:.83rem;margin-top:.6rem;line-height:1.5;min-height:3.9em}
+.vcard-meterhead{display:flex;justify-content:space-between;align-items:baseline;margin-top:.9rem}
+.vcard-meterhead span:first-child{font-size:.7rem;color:var(--faint)}
+.vcard-meterval{font-family:var(--mono);font-size:1rem;font-weight:600}
+.vcard-track{height:7px;border-radius:999px;background:var(--band);margin-top:.4rem;overflow:hidden}
+.vcard-fill{height:100%;border-radius:999px}
+
+/* =========================================================== full dashboard preview */
+.browser-frame{width:100%;max-width:800px;margin:clamp(1.6rem,3.5vh,2.2rem) auto 0;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05),0 18px 44px rgba(0,0,0,.10);text-align:left}
+.browser-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .85rem;background:var(--band);border-bottom:1px solid var(--line)}
+.browser-dot{width:9px;height:9px;border-radius:50%}
+.browser-url{margin-left:.5rem;font-family:var(--mono);font-size:.7rem;color:var(--faint);background:#fff;border:1px solid var(--line);border-radius:6px;padding:.18rem .55rem}
+.browser-body{background:var(--screen);padding:1.2rem 1.3rem 1.35rem}
+.dv-top{display:flex;align-items:center;gap:.5rem}
+.dv-dot{width:8px;height:8px;border-radius:50%}
+.dv-status{font-weight:640;font-size:1.02rem;color:#fff}
+.dv-read{color:#B9B9BE;font-size:.78rem;margin-top:.45rem;max-width:52ch;line-height:1.5}
+.dv-meterhead{display:flex;justify-content:space-between;align-items:baseline;margin-top:.9rem}
+.dv-meterhead span:first-child{font-size:.66rem;color:#86868B}
+.dv-meterval{font-family:var(--mono);font-size:1.15rem;font-weight:700;color:#fff}
+.dv-track{height:6px;border-radius:999px;background:#26262A;margin-top:.35rem;overflow:hidden}
+.dv-fill{height:100%;border-radius:999px}
+.dv-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#26262A;border-radius:10px;overflow:hidden;margin-top:1.1rem}
+@media (max-width:640px){.dv-strip{grid-template-columns:repeat(2,1fr)}}
+.dv-cell{background:#141416;padding:.65rem .75rem}
+.dv-cell .k{font-size:.6rem;color:#7C7C82;margin-bottom:.2rem}
+.dv-cell .v{font-family:var(--mono);font-size:.85rem;font-weight:600;color:#fff}
+
+/* =========================================================== results */
+.big-stat{font-family:var(--mono);font-size:clamp(3.6rem,8vw,6.2rem);font-weight:680;color:var(--ok);line-height:1;letter-spacing:-.02em}
+.big-stat-label{color:var(--muted);font-size:1rem;margin-top:.6rem}
+.honest{background:var(--band);border-radius:20px;padding:1.3rem 1.6rem;margin-top:clamp(1.5rem,3.5vh,2rem);max-width:66ch;text-align:left}
+.honest .k{font-size:.76rem;font-weight:700;color:var(--warn);letter-spacing:.03em;margin-bottom:.55rem;text-transform:uppercase}
+.honest p{color:var(--ink);font-size:.94rem;line-height:1.6}
+
+/* generic light strip, reused for impact + dataset stats */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:clamp(1.6rem,3.5vh,2.2rem);width:100%;text-align:left}
+.strip-cell{background:#fff;padding:1.15rem 1.3rem}
+.strip-cell .t{font-weight:640;font-size:.98rem;color:var(--ink)}
+.strip-cell .d{color:var(--muted);font-size:.82rem;margin-top:.45rem;line-height:1.5}
+
+/* =========================================================== comparison table */
+.cmp-scroll{width:100%;overflow-x:auto;margin-top:clamp(1.6rem,3.5vh,2.2rem)}
+.cmp-table{width:100%;min-width:560px;border:1px solid var(--line);border-radius:16px;overflow:hidden;text-align:left;border-collapse:separate}
+.cmp-row{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr;border-bottom:1px solid var(--line)}
+.cmp-row:last-child{border-bottom:none}
+.cmp-row.head{background:var(--band)}
+.cmp-cell{padding:.75rem .95rem;font-size:.84rem;color:var(--muted);display:flex;align-items:center}
+.cmp-row.head .cmp-cell{color:var(--ink);font-weight:640;font-size:.82rem}
+.cmp-cell.label{font-weight:600;color:var(--ink)}
+.cmp-cell.win{color:var(--ok);font-weight:640}
+.cmp-cell.lose{color:var(--faint)}
+
+/* =========================================================== feature grid */
+.feat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(1.1rem,2.5vw,1.75rem);width:100%;margin-top:clamp(1.6rem,3.5vh,2.2rem);text-align:left}
+@media (max-width:980px){.feat-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.feat-grid{grid-template-columns:1fr}}
+.fcard svg{width:27px;height:27px;color:var(--blue)}
+.fcard h3{font-size:1.02rem;font-weight:640;margin:.75rem 0 .35rem}
+.fcard p{color:var(--muted);font-size:.85rem;line-height:1.5}
+
+/* =========================================================== FAQ */
+.faq-list{display:flex;flex-direction:column;gap:.75rem;width:100%;max-width:760px;margin-top:clamp(1.6rem,3.5vh,2.2rem);text-align:left}
+.faq-item{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1rem 1.2rem}
+.faq-q{font-weight:640;font-size:.95rem;color:var(--ink)}
+.faq-a{color:var(--muted);font-size:.86rem;margin-top:.35rem;line-height:1.55}
+
+/* =========================================================== roadmap */
+.roadmap{display:flex;flex-direction:column;gap:0;width:100%;max-width:640px;margin-top:clamp(1.6rem,3.5vh,2.1rem);text-align:left}
+.rstep{display:flex;gap:1.05rem;padding:.9rem 0;border-bottom:1px solid var(--line)}
+.rstep:last-child{border-bottom:none}
+.rstep .n{font-family:var(--mono);font-size:.82rem;color:var(--blue);flex:none;width:2rem;padding-top:.15rem}
+.rstep .t{font-weight:620;font-size:.96rem;color:var(--ink)}
+.rstep .d{color:var(--muted);font-size:.84rem;margin-top:.28rem;line-height:1.5}
+
+/* =========================================================== close */
+.close-tag{font-size:clamp(1.25rem,2.6vw,1.8rem);color:var(--ink);font-weight:480;max-width:20ch;margin:1.05rem auto 0}
+.try-list{display:flex;flex-direction:column;gap:.6rem;max-width:520px;margin:1.9rem auto 0;text-align:left}
+.try-item{display:flex;gap:.8rem;align-items:flex-start;background:var(--band);border-radius:14px;padding:.85rem 1.05rem}
+.try-item .n{font-family:var(--mono);font-size:.78rem;color:var(--blue);flex:none;width:1.3rem;padding-top:.1rem}
+.try-item .t{font-weight:600;font-size:.9rem;color:var(--ink)}
+.try-item .d{color:var(--muted);font-size:.82rem;margin-top:.15rem}
+.linkrow{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.9rem}
+.linkpill{font-family:var(--mono);font-size:.8rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:.55rem 1.05rem;background:#fff}
+.linkpill.fill{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600}
+.close-thanks{margin-top:1.9rem;color:var(--faint);font-size:.88rem}
+</style>
+</head>
+<body>
+
+<div class="rail"><div class="rail-fill" id="railFill"></div></div>
+<nav class="nav">
+  <div class="nav-in">
+    <span class="logo">Grid<b>Sense</b></span>
+    <div class="nav-right">
+      <span class="idx"><em id="idxCur">01</em> / <span id="idxTotal">14</span></span>
+      <button class="iconbtn" id="prevBtn" aria-label="Previous slide">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <button class="iconbtn" id="nextBtn" aria-label="Next slide">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <span class="fs-link" id="fsBtn" role="button" tabindex="0">Fullscreen</span>
+    </div>
+  </div>
+</nav>
+
+<div class="deck">
+  <div class="track" id="track">
+
+    <!-- ============================================================ 0 . HERO -->
+    <section class="slide" id="s0">
+      <div class="wrap">
+        <div class="hero-eyebrow">Global Tech Innovation Challenge &middot; 2026</div>
+        <h1 class="h1">Your machines are trying<br>to tell you something.</h1>
+        <p class="h0-sub">Point a microphone at a motor, a fan, or a pump. GridSense listens for the sounds trouble makes, long before they turn into a repair bill.</p>
+        <button class="btn-primary" id="heroCta">See it listen<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>
+        <div class="h0-fine">Runs entirely on your own laptop. Nothing you record ever leaves it.*</div>
+        <div class="stickers" aria-hidden="true">
+          <div class="sticker st-mic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0M12 17v5M9 22h6"/></svg></div>
+          <div class="sticker round st-score"><span class="n">98</span><span class="l">HEALTH SCORE</span></div>
+          <div class="sticker st-wave"><svg width="72" height="30" viewBox="0 0 80 34" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M2 17h4l3-11 4 22 4-16 3 9 4-13 4 20 3-11h4l3 6 3-9 4 13h20"/></svg></div>
+          <div class="sticker round st-offline"><i></i><span>Offline</span></div>
+          <div class="sticker st-wrench"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 005.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 1 . PROBLEM -->
+    <section class="slide left" id="s1">
+      <div class="wrap">
+        <div class="eyebrow">Why we built this</div>
+        <h2>Most of us just wait for things to break.</h2>
+        <p class="lede">A dryer starts to squeal. A ceiling fan starts to wobble. We usually ignore it until the day it stops working completely, because the tools that catch this early were built for factories, not for the rest of us: sensor networks and cloud dashboards that run into the thousands of dollars per machine, per year.</p>
+        <div class="left-grid">
+          <div class="left-cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span>Homes &amp; families</span></div>
+          <div class="left-cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 005.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Small workshops</span></div>
+          <div class="left-cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V6z"/></svg><span>Clinics &amp; schools</span></div>
+          <div class="left-cell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10l8-6 8 6v10M4 20h16M9 20v-6h6v6"/></svg><span>Farms &amp; small business</span></div>
+        </div>
+        <p class="fineprint">All four are left with nothing but their own ears, because listening for the early warning was never something they could afford.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 2 . HOW IT WORKS (plain) -->
+    <section class="slide left" id="s2">
+      <div class="wrap">
+        <div class="eyebrow">How it works</div>
+        <h2>You don't need new hardware. You need someone who's really listening.</h2>
+        <p class="lede">Every experienced technician can hear a failing bearing before they ever check a gauge. GridSense learned to listen the same way, in three simple steps, with nothing to install and nothing to wire up.</p>
+        <div class="how-grid">
+          <div class="hw"><div class="n">Step one</div><h3>Capture</h3><p>Record a few seconds of the machine running, or load a sound file. A phone microphone is enough.</p></div>
+          <div class="hw"><div class="n">Step two</div><h3>Listen</h3><p>GridSense breaks the sound into its underlying frequencies and compares it against what healthy and failing machines sound like.</p></div>
+          <div class="hw"><div class="n">Step three</div><h3>Act</h3><p>You get a health score, the likely cause, and the one thing to do next, in plain language.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 3 . UNDER THE HOOD (technical) -->
+    <section class="slide left" id="s3">
+      <div class="wrap">
+        <div class="eyebrow">For the technically curious</div>
+        <h2>Here's exactly what happens between the microphone and the score.</h2>
+        <p class="lede">Five stages, all running on ordinary laptop hardware in well under a second, with no GPU and no network call.</p>
+        <div class="pipe-row">
+          <div class="pipe-node"><div class="n">Input</div><div class="t">Mic or .wav</div><div class="d">2-3 sec clip</div></div>
+          <div class="pipe-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          <div class="pipe-node"><div class="n">Signal</div><div class="t">FFT / STFT</div><div class="d">frequency spectrum</div></div>
+          <div class="pipe-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          <div class="pipe-node"><div class="n">Features</div><div class="t">20 MFCCs +</div><div class="d">centroid, rolloff, ZCR, RMS</div></div>
+          <div class="pipe-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          <div class="pipe-node"><div class="n">Model</div><div class="t">RandomForest</div><div class="d">300 trees, scikit-learn</div></div>
+          <div class="pipe-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          <div class="pipe-node"><div class="n">Output</div><div class="t">Health Index</div><div class="d">0-100 + action</div></div>
+        </div>
+        <p class="fineprint">The same feature-extraction code path is shared by training and the live app, in one file, so what the model learned on is exactly what it sees at inference time.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 4 . SYNTHETIC DATA -->
+    <section class="slide left" id="s4">
+      <div class="wrap">
+        <div class="eyebrow">How we trained it without a lab</div>
+        <h2>We couldn't afford a shelf of failing motors, so we built one in code.</h2>
+        <p class="lede">A physics-based audio generator models a healthy motor as a harmonic hum with background noise, friction as an added high-frequency grinding component, and imbalance as a slow low-frequency wobble in loudness, each with randomized severity so the model can't just memorize one sound.</p>
+        <div class="synth-row">
+          <div class="synth-card"><div class="t">240 clips</div><div class="d">generated across three balanced classes</div></div>
+          <div class="synth-card"><div class="t">80 per class</div><div class="d">healthy, friction, and imbalance</div></div>
+          <div class="synth-card"><div class="t">One command</div><div class="d">the whole dataset is fully reproducible</div></div>
+          <div class="synth-card"><div class="t">Zero hardware</div><div class="d">no physical motor was needed to build or test this</div></div>
+        </div>
+        <p class="fineprint">This also means anyone judging this project can regenerate the dataset and retrain the model themselves in a couple of minutes, with `python generate_synthetic_data.py` and `python train_model.py`.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 5 . LIVE DEMO -->
+    <section class="slide left" id="s5">
+      <div class="wrap">
+        <div class="eyebrow">See it for yourself</div>
+        <h2>The same three seconds. Three very different stories.</h2>
+        <p class="lede">This is the real dashboard, reading three real clips, not a mockup dressed up for a slide.</p>
+        <div class="cards3">
+          <div class="vcard">
+            <div class="vscreen"><canvas class="scope" data-hue="ok"></canvas></div>
+            <div class="vcard-top"><span class="vcard-dot" style="background:var(--ok)"></span><span class="vcard-status" style="color:var(--ok)">Healthy</span></div>
+            <div class="vcard-read">A clean, even hum. Energy stays low and steady, right where a healthy motor should be. Nothing to do here.</div>
+            <div class="vcard-meterhead"><span>Health score</span><span class="vcard-meterval" style="color:var(--ok)">97/100</span></div>
+            <div class="vcard-track"><div class="vcard-fill" style="width:97%;background:var(--ok)"></div></div>
+          </div>
+          <div class="vcard">
+            <div class="vscreen"><canvas class="scope" data-hue="crit"></canvas></div>
+            <div class="vcard-top"><span class="vcard-dot" style="background:var(--crit)"></span><span class="vcard-status" style="color:var(--crit)">Bearing friction</span></div>
+            <div class="vcard-read">A sharp, high-pitched grind riding on top of the hum. GridSense recommends inspecting and re-lubricating the bearing soon.</div>
+            <div class="vcard-meterhead"><span>Health score</span><span class="vcard-meterval" style="color:var(--crit)">14/100</span></div>
+            <div class="vcard-track"><div class="vcard-fill" style="width:14%;background:var(--crit)"></div></div>
+          </div>
+          <div class="vcard">
+            <div class="vscreen"><canvas class="scope" data-hue="warn"></canvas></div>
+            <div class="vcard-top"><span class="vcard-dot" style="background:var(--warn)"></span><span class="vcard-status" style="color:var(--warn)">Mechanical imbalance</span></div>
+            <div class="vcard-read">A slow wobble in the loudness, a few times a second. GridSense recommends checking the rotor balance and mounting bolts.</div>
+            <div class="vcard-meterhead"><span>Health score</span><span class="vcard-meterval" style="color:var(--warn)">52/100</span></div>
+            <div class="vcard-track"><div class="vcard-fill" style="width:52%;background:var(--warn)"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 6 . FULL DASHBOARD PREVIEW -->
+    <section class="slide left" id="s6">
+      <div class="wrap">
+        <div class="eyebrow">The full picture</div>
+        <h2>One reading gives you a lot more than a single number.</h2>
+        <p class="lede">Here's everything the dashboard shows for a single bearing-friction result, laid out the way you'd actually see it.</p>
+        <div class="browser-frame">
+          <div class="browser-bar">
+            <span class="browser-dot" style="background:#FF5F57"></span>
+            <span class="browser-dot" style="background:#FEBC2E"></span>
+            <span class="browser-dot" style="background:#28C840"></span>
+            <span class="browser-url">localhost &middot; GridSense dashboard</span>
+          </div>
+          <div class="browser-body">
+            <div class="dv-top"><span class="dv-dot" style="background:var(--crit-v)"></span><span class="dv-status">Critical Failure</span></div>
+            <div class="dv-read">GridSense hears high-frequency grinding, the signature of metal-on-metal bearing wear. This usually appears well before the bearing seizes.</div>
+            <div class="dv-meterhead"><span>Machine Health Index</span><span class="dv-meterval" style="color:var(--crit-v)">14/100</span></div>
+            <div class="dv-track"><div class="dv-fill" style="width:14%;background:var(--crit-v)"></div></div>
+            <div class="dv-strip">
+              <div class="dv-cell"><div class="k">Detected condition</div><div class="v" style="color:var(--crit-v)">Friction</div></div>
+              <div class="dv-cell"><div class="k">Dominant frequency</div><div class="v">4,120 Hz</div></div>
+              <div class="dv-cell"><div class="k">Energy above 3 kHz</div><div class="v">68%</div></div>
+              <div class="dv-cell"><div class="k">Model confidence</div><div class="v">94%</div></div>
+            </div>
+          </div>
+        </div>
+        <p class="fineprint">The live app also shows the waveform, the full spectrogram, and a confidence breakdown across all three conditions.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 7 . RESULTS -->
+    <section class="slide" id="s7">
+      <div class="wrap">
+        <div class="eyebrow">Does it actually work</div>
+        <h2>98.3 times out of 100, yes.</h2>
+        <div class="big-stat">98.3<span style="font-size:.4em;color:var(--muted)">%</span></div>
+        <div class="big-stat-label">accuracy on sound the model had never heard before</div>
+        <div class="strip">
+          <div class="strip-cell"><div class="t">240 total clips</div><div class="d">generated, not scraped from an existing dataset</div></div>
+          <div class="strip-cell"><div class="t">180 / 60 split</div><div class="d">trained on 180 clips, tested on 60 held-out clips</div></div>
+          <div class="strip-cell"><div class="t">3 balanced classes</div><div class="d">healthy, bearing friction, mechanical imbalance</div></div>
+          <div class="strip-cell"><div class="t">300-tree forest</div><div class="d">scikit-learn RandomForest, trained in seconds</div></div>
+        </div>
+        <div class="honest">
+          <div class="k">Being upfront about the miss</div>
+          <p>The one time it got confused, it mistook a very early, very quiet warning sign for a healthy motor. That's honestly the hardest kind of mistake to avoid, even for a trained ear. We'd rather show you that than hide it behind a perfect-looking number.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 8 . GRIDSENSE VS THE ALTERNATIVES -->
+    <section class="slide left" id="s8">
+      <div class="wrap">
+        <div class="eyebrow">The honest comparison</div>
+        <h2>What you'd use today, next to what GridSense costs you.</h2>
+        <div class="cmp-scroll">
+          <div class="cmp-table">
+            <div class="cmp-row head">
+              <div class="cmp-cell label">&nbsp;</div>
+              <div class="cmp-cell">Doing nothing</div>
+              <div class="cmp-cell">Traditional predictive maintenance</div>
+              <div class="cmp-cell">GridSense</div>
+            </div>
+            <div class="cmp-row"><div class="cmp-cell label">Upfront cost</div><div class="cmp-cell">$0</div><div class="cmp-cell lose">Thousands per machine</div><div class="cmp-cell win">Free</div></div>
+            <div class="cmp-row"><div class="cmp-cell label">Hardware needed</div><div class="cmp-cell">None</div><div class="cmp-cell lose">Vibration sensors, SCADA</div><div class="cmp-cell win">A microphone</div></div>
+            <div class="cmp-row"><div class="cmp-cell label">Setup time</div><div class="cmp-cell">None</div><div class="cmp-cell lose">Days to weeks</div><div class="cmp-cell win">Under a minute</div></div>
+            <div class="cmp-row"><div class="cmp-cell label">Internet required</div><div class="cmp-cell">No</div><div class="cmp-cell lose">Usually, for the cloud dashboard</div><div class="cmp-cell win">Never</div></div>
+            <div class="cmp-row"><div class="cmp-cell label">Tells you what to fix</div><div class="cmp-cell">No</div><div class="cmp-cell">Sometimes</div><div class="cmp-cell win">Yes, in plain language</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 9 . WHY DIFFERENT -->
+    <section class="slide left" id="s9">
+      <div class="wrap">
+        <div class="eyebrow">What makes it different</div>
+        <h2>No new hardware. No monthly bill. No catch.</h2>
+        <div class="feat-grid">
+          <div class="fcard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0M12 17v5M9 22h6"/></svg><h3>It just listens</h3><p>No accelerometers, no proprietary sensors. A laptop or phone microphone is the whole setup.</p></div>
+          <div class="fcard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><h3>It stays private</h3><p>Everything runs on your own device. Nothing you record is ever uploaded anywhere.</p></div>
+          <div class="fcard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 005.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><h3>It tells you what's next</h3><p>Not a raw number to decode on your own, a plain-language recommendation you can act on today.</p></div>
+          <div class="fcard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5m0 14h16M8 15l3-4 3 3 4-6"/></svg><h3>It's honest</h3><p>Its confidence and its known limitations are shown right alongside every result, not tucked away.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 10 . IMPACT -->
+    <section class="slide" id="s10">
+      <div class="wrap">
+        <div class="eyebrow">Why it matters</div>
+        <h2>A little warning goes a long way.</h2>
+        <div class="strip">
+          <div class="strip-cell"><div class="t">Machines last longer</div><div class="d">Catch a fault while it's still cheap to fix, well before an unplanned breakdown.</div></div>
+          <div class="strip-cell"><div class="t">Less ends up in landfill</div><div class="d">A repaired bearing beats a replaced motor. Fewer machines scrapped early.</div></div>
+          <div class="strip-cell"><div class="t">Nothing to subscribe to</div><div class="d">No cloud bill, no sensor hardware to install, no recurring cost of any kind.</div></div>
+          <div class="strip-cell"><div class="t">Works nearly anywhere</div><div class="d">Factory motors, HVAC, medical devices, farm pumps, even a kitchen fan.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 11 . FAQ -->
+    <section class="slide left" id="s11">
+      <div class="wrap">
+        <div class="eyebrow">Common questions</div>
+        <h2>What people usually ask when they see this for the first time.</h2>
+        <div class="faq-list">
+          <div class="faq-item"><div class="faq-q">Does it need an internet connection?</div><div class="faq-a">No, never. Every computation, from the FFT to the final score, runs locally on your device.</div></div>
+          <div class="faq-item"><div class="faq-q">Will background noise confuse it?</div><div class="faq-a">The model is trained with realistic background noise mixed in, but a quiet room and 2-3 seconds recorded close to the machine give the most reliable reading.</div></div>
+          <div class="faq-item"><div class="faq-q">What if I don't have a failing machine to test on?</div><div class="faq-a">The app ships with 240 pre-generated sample clips across all three conditions, so you can try every verdict without a single physical motor.</div></div>
+          <div class="faq-item"><div class="faq-q">Can it damage my device or the machine?</div><div class="faq-a">No. GridSense only listens. It never controls, connects to, or otherwise interacts with the machine itself.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 12 . ROADMAP -->
+    <section class="slide left" id="s12">
+      <div class="wrap">
+        <div class="eyebrow">Where we're taking it</div>
+        <h2>This is version one.</h2>
+        <div class="roadmap">
+          <div class="rstep"><div class="n">01</div><div><div class="t">Real-machine field testing</div><div class="d">Validate accuracy on real motors, fans, and pumps, beyond the synthetic dataset used to build this.</div></div></div>
+          <div class="rstep"><div class="n">02</div><div><div class="t">Teaching it new sounds</div><div class="d">Electrical arcing, cavitation, and gear-mesh wear, on top of friction and imbalance.</div></div></div>
+          <div class="rstep"><div class="n">03</div><div><div class="t">A trend view over time</div><div class="d">Track a specific machine's health across weeks to catch slow decline, not just a single reading.</div></div></div>
+          <div class="rstep"><div class="n">04</div><div><div class="t">A standalone listening device</div><div class="d">A small Raspberry Pi build for machines that don't have a laptop nearby.</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 13 . CLOSE -->
+    <section class="slide" id="s13">
+      <div class="wrap">
+        <span class="logo" style="font-size:clamp(1.9rem,4.6vw,2.7rem)">Grid<b>Sense</b></span>
+        <div class="close-tag">Predictive maintenance for everyone.</div>
+        <div class="try-list">
+          <div class="try-item"><div class="n">01</div><div><div class="t">Double-click demo.html</div><div class="d">A no-install interactive walkthrough of a whole house.</div></div></div>
+          <div class="try-item"><div class="n">02</div><div><div class="t">Run python run.py</div><div class="d">The full live dashboard, with your own microphone.</div></div></div>
+          <div class="try-item"><div class="n">03</div><div><div class="t">Read PITCH_ONEPAGER.md</div><div class="d">A one-page summary of everything in this deck.</div></div></div>
+        </div>
+        <div class="linkrow">
+          <span class="linkpill fill">github.com/&lt;your-username&gt;/gridsense</span>
+        </div>
+        <div class="close-thanks">Thank you. We'd love your questions.</div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var track = document.getElementById("track");
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var n = slides.length;
+  var i = 0;
+  var railFill = document.getElementById("railFill");
+  var idxCur = document.getElementById("idxCur");
+  var idxTotal = document.getElementById("idxTotal");
+  var prevBtn = document.getElementById("prevBtn");
+  var nextBtn = document.getElementById("nextBtn");
+  idxTotal.textContent = String(n).padStart(2,"0");
+
+  function render(){
+    track.style.transform = "translateY(-" + (i * 100) + "%)";
+    railFill.style.transform = "scaleX(" + ((i+1)/n) + ")";
+    idxCur.textContent = String(i+1).padStart(2,"0");
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = i === n-1;
+  }
+  function go(delta){
+    i = Math.max(0, Math.min(n-1, i+delta));
+    render();
+  }
+  prevBtn.addEventListener("click", function(){ go(-1); });
+  nextBtn.addEventListener("click", function(){ go(1); });
+  document.getElementById("heroCta").addEventListener("click", function(){ go(1); });
+
+  document.addEventListener("keydown", function(e){
+    if (["ArrowDown","ArrowRight","PageDown"," "].indexOf(e.key) > -1){ e.preventDefault(); go(1); }
+    else if (["ArrowUp","ArrowLeft","PageUp"].indexOf(e.key) > -1){ e.preventDefault(); go(-1); }
+    else if (e.key === "Home"){ e.preventDefault(); i = 0; render(); }
+    else if (e.key === "End"){ e.preventDefault(); i = n-1; render(); }
+  });
+
+  document.querySelector(".deck").addEventListener("click", function(e){
+    if (e.target.closest("button") || e.target.closest("a")) return;
+    var x = e.clientX / window.innerWidth;
+    go(x < 0.25 ? -1 : 1);
+  });
+
+  var fsBtn = document.getElementById("fsBtn");
+  function toggleFs(){
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(function(){});
+      fsBtn.textContent = "Exit fullscreen";
+    } else {
+      document.exitFullscreen();
+      fsBtn.textContent = "Fullscreen";
+    }
+  }
+  fsBtn.addEventListener("click", toggleFs);
+  fsBtn.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); toggleFs(); } });
+  document.addEventListener("fullscreenchange", function(){
+    fsBtn.textContent = document.fullscreenElement ? "Exit fullscreen" : "Fullscreen";
+  });
+
+  render();
+
+  // ---------------------------------------------------------- mini scopes
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var hues = { ok:"48,192,112", crit:"255,90,72", warn:"245,166,35" };
+  document.querySelectorAll("canvas.scope").forEach(function(canvas){
+    var ctx = canvas.getContext("2d");
+    var w, h;
+    function resize(){
+      w = canvas.width = canvas.clientWidth * devicePixelRatio;
+      h = canvas.height = canvas.clientHeight * devicePixelRatio;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+    var rgb = hues[canvas.dataset.hue] || "10,102,224";
+    var jag = canvas.dataset.hue === "crit" ? 9 : (canvas.dataset.hue === "warn" ? 2.4 : 1);
+    var wobble = canvas.dataset.hue === "warn" ? 3 : 0.4;
+
+    if (reduceMotion) {
+      ctx.strokeStyle = "rgba(" + rgb + ",.85)";
+      ctx.lineWidth = 1.4 * devicePixelRatio;
+      ctx.beginPath();
+      for (var x = 0; x < w; x++){
+        var t = x / w * Math.PI * 2;
+        var y = h/2 + Math.sin(t*6)*h*0.14 + Math.sin(t*jag*3)*h*0.08*(jag/9);
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      return;
+    }
+
+    var t0 = performance.now();
+    function frame(now){
+      var t = (now - t0) / 1000;
+      ctx.clearRect(0,0,w,h);
+      ctx.strokeStyle = "rgba(" + rgb + ",.9)";
+      ctx.lineWidth = 1.5 * devicePixelRatio;
+      ctx.beginPath();
+      var env = 1 + wobble * 0.35 * Math.sin(t * 2.1);
+      for (var x = 0; x <= w; x += 2){
+        var phase = x / w * Math.PI * 2;
+        var y = h/2
+          + Math.sin(phase*5 + t*3) * h*0.16 * env
+          + Math.sin(phase*jag*4 + t*9) * h*0.05 * (jag/9);
+        if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+})();
+</script>
+</body>
+</html>

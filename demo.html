@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GridSense — Listen to your house</title>
+<style>
+/* ===================================================================
+   GridSense demo — light, typography-led product page.
+   Design language borrows the calm of Apple/Google product pages
+   (generous whitespace, one bold headline per band, pill actions,
+   a dark "device screen" for the signal), but it is GridSense's own.
+
+   Colour rule: blue is the only interactive/brand accent; green /
+   amber / red mean machine STATE and nothing else. On light surfaces
+   the darker semantic shades are used (contrast-verified); the vivid
+   ones appear only inside the dark instrument card.
+
+   System fonts only — the page runs with zero network access.
+   =================================================================== */
+:root{
+  --bg:#FFFFFF; --band:#F5F5F7; --card:#FFFFFF;
+  --ink:#1D1D1F; --muted:#6E6E73; --faint:#86868B; --line:#D2D2D7;
+  --blue:#0A66E0; --blue-press:#0A57BE;
+  --ok:#157F45; --warn:#8A5A00; --crit:#CF2436;                 /* on light */
+  --ok-v:#30C070; --warn-v:#F5A623; --crit-v:#FF5A48;           /* on dark  */
+  --screen:#0E0E10; --screen-line:#26262A;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,"Helvetica Neue",Arial,sans-serif;
+  --mono:"SF Mono","Cascadia Code",ui-monospace,"Segoe UI Mono",Consolas,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --shadow:0 2px 10px rgba(0,0,0,.05),0 12px 40px rgba(0,0,0,.06);
+  --z-nav:50;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:#0A66E0;color:#fff}
+h1,h2,h3{letter-spacing:-.022em;text-wrap:balance}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(1.25rem,4vw,2.5rem)}
+
+.js .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.js .reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .reveal{opacity:1;transform:none;transition:none}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important}
+}
+
+/* ---------- Nav ---------- */
+.nav{position:sticky;top:0;z-index:var(--z-nav);background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.07)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:48px}
+.logo{font-weight:600;font-size:1.02rem;letter-spacing:-.01em}
+.logo b{color:var(--blue);font-weight:600}
+.nav-links{display:flex;gap:clamp(1rem,3vw,2.2rem);align-items:center}
+.nav-links a{font-size:.82rem;color:var(--muted);text-decoration:none;transition:color .2s var(--ease)}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a.pill{background:var(--blue);color:#fff;padding:.4rem .9rem;border-radius:980px;font-weight:500;transition:background .2s var(--ease)}
+.nav-links a.pill:hover{background:var(--blue-press);color:#fff}
+@media (max-width:620px){.nav-links a.plain{display:none}}
+
+/* ---------- Hero ---------- */
+.hero{text-align:center;padding:clamp(3.5rem,9vw,7rem) 0 0}
+.hero h1{font-size:clamp(2.6rem,6.4vw,4.6rem);font-weight:680;line-height:1.03;letter-spacing:-.035em}
+.hero .lede{font-size:clamp(1.15rem,2.2vw,1.55rem);color:var(--muted);font-weight:420;max-width:34ch;margin:1.35rem auto 0;line-height:1.4;text-wrap:pretty}
+.hero-cta{display:flex;gap:1.5rem;justify-content:center;align-items:center;margin-top:2.1rem;flex-wrap:wrap}
+.btn-primary{background:var(--blue);color:#fff;border:none;border-radius:980px;padding:.85rem 1.7rem;font:inherit;font-weight:500;font-size:1.02rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:background .2s var(--ease),transform .2s var(--ease)}
+.btn-primary:hover{background:var(--blue-press);transform:translateY(-1px)}
+.btn-primary:focus-visible{outline:3px solid #9DC3F6;outline-offset:2px}
+.link-arrow{color:var(--blue);text-decoration:none;font-size:1.02rem;font-weight:450;display:inline-flex;align-items:center;gap:.3rem}
+.link-arrow:hover{text-decoration:underline}
+.hero-info{margin-top:clamp(2.5rem,5vw,4rem)}
+.hero-info-lead{font-size:clamp(1rem,1.7vw,1.2rem);color:var(--ink);font-weight:500;text-align:center;margin-bottom:1.5rem}
+.sig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem}
+@media (max-width:760px){.sig-grid{grid-template-columns:1fr}}
+.sig-card{background:var(--band);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.1rem 1.25rem;text-align:left}
+.sig-scope{width:100%;height:76px;display:block;background:#0E0E10;border-radius:9px}
+.sig-h{display:flex;align-items:center;gap:.5rem;font-weight:600;font-size:1.02rem;margin-top:.85rem}
+.sig-h i{width:9px;height:9px;border-radius:50%}
+.sig-card p{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.45}
+
+/* ---------- Features ---------- */
+.features{background:var(--band);margin-top:clamp(2.5rem,5vw,4rem);padding:clamp(3rem,7vw,5.5rem) 0}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.5rem,4vw,3rem)}
+@media (max-width:760px){.feat-grid{grid-template-columns:1fr;gap:2.25rem}}
+.feat .ico{width:34px;height:34px;color:var(--blue);margin-bottom:1rem}
+.feat h3{font-size:1.28rem;font-weight:600;margin-bottom:.5rem}
+.feat p{color:var(--muted);font-size:.98rem;line-height:1.5;max-width:36ch}
+
+/* ---------- Section headers ---------- */
+.sec{padding:clamp(3.5rem,8vw,6rem) 0}
+.sec-title{text-align:center;max-width:44ch;margin:0 auto clamp(2rem,4vw,3rem)}
+.sec-title h2{font-size:clamp(2rem,4.4vw,3rem);font-weight:660;line-height:1.06}
+.sec-title p{color:var(--muted);font-size:clamp(1.05rem,1.8vw,1.25rem);margin-top:.9rem;text-wrap:pretty}
+
+/* ---------- Demo stage ---------- */
+.stage{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,1fr);gap:1.5rem;align-items:start}
+@media (max-width:980px){.stage{grid-template-columns:1fr}}
+.panel-card{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.plan-card{padding:clamp(1rem,2.5vw,1.5rem);position:sticky;top:68px}
+@media (max-width:980px){.plan-card{position:static}}
+.plan-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.plan-top .t{font-weight:600;font-size:1.02rem}
+.tools{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:980px;padding:.45rem .9rem;font:inherit;font-size:.82rem;font-weight:500;cursor:pointer;transition:background .18s var(--ease),border-color .18s var(--ease),color .18s var(--ease);display:inline-flex;align-items:center;gap:.4rem}
+.btn:hover{background:var(--band);border-color:var(--faint)}
+.btn:focus-visible{outline:3px solid #9DC3F6;outline-offset:2px}
+.btn.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.solid:hover{background:#000}
+svg.plan{width:100%;height:auto;display:block;touch-action:manipulation}
+.room{fill:#FAFAFB;stroke:var(--line);stroke-width:1.5}
+.rlabel{fill:var(--faint);font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:.02em}
+.node{cursor:pointer}
+.node:focus{outline:none}
+.node:focus-visible .ring{stroke:var(--blue);stroke-width:3}
+.ring{fill:#fff;stroke:var(--faint);stroke-width:2;transition:stroke .25s var(--ease)}
+.node:hover .ring{stroke:var(--ink)}
+.nlabel{fill:var(--muted);font-family:var(--sans);font-size:10.5px;font-weight:500;text-anchor:middle}
+.ndot{transition:fill .25s var(--ease)}
+@keyframes ping{0%{r:15;opacity:.5}100%{r:30;opacity:0}}
+.playing .ping{animation:ping 1.4s var(--ease) infinite}
+.legend{display:flex;gap:1.1rem;flex-wrap:wrap;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line)}
+.legend span{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--muted)}
+.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* analysis panel (shared by demo + mic result) */
+.panel{padding:clamp(1.35rem,3vw,2rem)}
+.empty h3{font-size:1.3rem;font-weight:600}
+.empty p{color:var(--muted);margin-top:.6rem;font-size:.98rem;max-width:46ch}
+.empty ol{margin:1.25rem 0 0;padding-left:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:.85rem}
+.empty li{counter-increment:s;display:flex;gap:.8rem;align-items:flex-start;font-size:.96rem;color:var(--ink)}
+.empty li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--band);color:var(--blue);font-weight:600;font-size:.85rem;display:grid;place-items:center;font-family:var(--mono)}
+.pl-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.pl-head h3{font-size:1.5rem;font-weight:640}
+.pl-head .sub{font-size:.85rem;color:var(--faint);font-weight:500}
+.verdict{display:inline-flex;align-items:center;gap:.55rem;margin-top:1.1rem;padding:.4rem .85rem;border-radius:980px;background:var(--band);font-weight:600;font-size:.95rem}
+.verdict i{width:10px;height:10px;border-radius:50%}
+.reading{color:var(--muted);font-size:1rem;line-height:1.55;margin-top:1rem;max-width:60ch;text-wrap:pretty}
+.meter{margin-top:1.5rem}
+.meter-top{display:flex;justify-content:space-between;align-items:baseline}
+.meter-top .l{font-size:.85rem;color:var(--faint)}
+.meter-top .v{font-family:var(--mono);font-size:1.6rem;font-weight:600;letter-spacing:-.02em}
+.meter-top .v small{font-size:.85rem;color:var(--muted)}
+.track{height:10px;border-radius:980px;background:var(--band);margin-top:.5rem;overflow:hidden}
+.fill{height:100%;border-radius:980px;width:100%;transform:translateX(-100%);transition:transform .7s var(--ease),background .3s var(--ease)}
+.ticks{position:relative;height:1.05rem;margin-top:.3rem}
+.ticks span{position:absolute;transform:translateX(-50%);font-family:var(--mono);font-size:.68rem;color:var(--faint)}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:1.6rem}
+.cell{background:var(--card);padding:.85rem .95rem}
+.cell .k{font-size:.74rem;color:var(--faint);margin-bottom:.3rem}
+.cell .v{font-family:var(--mono);font-size:1.05rem;font-weight:600}
+.cell .v small{font-size:.72rem;color:var(--muted);font-weight:400}
+.screen{margin-top:1.6rem;background:var(--screen);border-radius:16px;padding:1.1rem 1.1rem 1.2rem}
+.screen h4{font-size:.78rem;font-weight:600;color:#B9B9BE;letter-spacing:.02em;margin:0 0 .5rem}
+.screen h4:not(:first-child){margin-top:1.1rem}
+canvas.scope{width:100%;height:92px;display:block;border-radius:8px;background:#141416}
+.screen .cap{font-size:.78rem;color:#7C7C82;margin-top:.45rem;line-height:1.45;text-wrap:pretty}
+.subhead{font-size:.8rem;font-weight:600;color:var(--faint);letter-spacing:.02em;margin:1.75rem 0 .75rem}
+.bars{display:flex;flex-direction:column;gap:.6rem}
+.bar{display:grid;grid-template-columns:80px 1fr 42px;align-items:center;gap:.7rem}
+.bar .k{font-size:.86rem;color:var(--muted)}
+.bar .t{height:8px;border-radius:980px;background:var(--band);overflow:hidden}
+.bar .f{height:100%;border-radius:980px;width:100%;transform:translateX(-100%);transition:transform .7s var(--ease)}
+.bar .v{font-family:var(--mono);font-size:.8rem;color:var(--muted);text-align:right}
+.steps{margin-top:.75rem;display:flex;flex-direction:column;gap:.75rem}
+.step{display:flex;gap:.85rem;align-items:flex-start}
+.step .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-family:var(--mono);font-size:.8rem;font-weight:600;display:grid;place-items:center}
+.step .b .t{font-weight:600;font-size:.98rem}
+.step .b .d{color:var(--muted);font-size:.9rem;margin-top:.15rem;text-wrap:pretty}
+
+/* how it works */
+.how{background:var(--band)}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.25rem,3vw,2.5rem);counter-reset:hw}
+@media (max-width:760px){.how-grid{grid-template-columns:1fr}}
+.hw{counter-increment:hw}
+.hw .n{font-family:var(--mono);font-size:.9rem;color:var(--blue);font-weight:600}
+.hw .n::before{content:"0" counter(hw)}
+.hw h3{font-size:1.32rem;font-weight:600;margin:.55rem 0 .4rem}
+.hw p{color:var(--muted);font-size:.98rem;line-height:1.5}
+
+/* try it yourself */
+.try{text-align:center}
+.try-card{background:var(--ink);color:#fff;border-radius:28px;padding:clamp(2.5rem,6vw,4.5rem) clamp(1.5rem,5vw,4rem);max-width:900px;margin:0 auto}
+.try-card h2{font-size:clamp(1.9rem,4vw,2.8rem);font-weight:660;color:#fff}
+.try-card p{color:#B9B9BE;font-size:clamp(1.02rem,1.7vw,1.2rem);max-width:52ch;margin:1rem auto 0;line-height:1.5}
+.rec-zone{margin-top:2.25rem;display:flex;flex-direction:column;align-items:center;gap:.9rem}
+.rec-btn{display:inline-flex;align-items:center;gap:.65rem;background:#fff;color:var(--ink);border:none;border-radius:980px;padding:.95rem 2rem;font:inherit;font-weight:600;font-size:1.05rem;cursor:pointer;transition:transform .2s var(--ease),background .2s var(--ease)}
+.rec-btn .rdot{width:13px;height:13px;border-radius:50%;background:var(--crit-v)}
+.rec-btn:hover{transform:translateY(-1px)}
+.rec-btn:disabled{opacity:.55;cursor:default;transform:none}
+.rec-btn.recording{background:#33333a;color:#fff}
+.rec-btn.recording .rdot{animation:blink 1s steps(2,start) infinite}
+@keyframes blink{50%{opacity:.2}}
+.rec-status{font-size:.9rem;color:#B9B9BE;min-height:1.2em}
+.mic-result{margin-top:2rem;text-align:left}
+.mic-result:empty{margin:0}
+.try-alt{margin-top:2.25rem}
+
+/* mic single-shot analyser */
+.mic-pick{margin-top:2rem;display:flex;flex-direction:column;align-items:center;gap:.6rem}
+.mic-pick label{font-size:.9rem;color:#B9B9BE}
+.mic-pick select{appearance:none;-webkit-appearance:none;background:#1A1A1E;color:#fff;border:1px solid #3A3A40;border-radius:10px;padding:.65rem 2.4rem .65rem 1rem;font:inherit;font-size:.98rem;cursor:pointer;min-width:250px;text-align:center;text-align-last:center;background-image:linear-gradient(45deg,transparent 50%,#86868B 50%),linear-gradient(135deg,#86868B 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 12px) 55%;background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+.mic-pick select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.rec-btn.recording .rdot{animation:blink 1s steps(2,start) infinite}
+.findings{margin-top:1.6rem;display:flex;flex-direction:column;gap:.7rem}
+.finding{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:1rem 1.15rem}
+.finding .ft{display:flex;align-items:center;gap:.5rem;font-weight:600;font-size:.98rem}
+.finding .ft i{width:9px;height:9px;border-radius:50%}
+.finding .fd{color:var(--muted);font-size:.9rem;margin-top:.3rem;text-wrap:pretty}
+.ref-note{font-size:.85rem;color:#86868B;margin-top:1rem;max-width:52ch;margin-inline:auto}
+
+/* footer */
+.foot{border-top:1px solid var(--line);padding:2.25rem 0 3rem}
+.foot p{color:var(--faint);font-size:.82rem;line-height:1.6;max-width:78ch}
+.foot b{color:var(--muted);font-weight:600}
+.foot .row{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.foot .logo{font-size:.95rem}
+</style>
+</head>
+<body>
+
+<!-- ============================ NAV ============================ -->
+<nav class="nav">
+  <div class="wrap nav-in">
+    <span class="logo">Grid<b>Sense</b></span>
+    <div class="nav-links">
+      <a class="plain" href="#features">Overview</a>
+      <a class="plain" href="#demo">Demo</a>
+      <a class="pill" href="#try">Try it yourself</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<header class="hero">
+  <div class="wrap">
+    <h1 class="reveal">Your house is telling you<br>what's about to break.</h1>
+    <p class="lede reveal">Every motor sounds different as it starts to fail. GridSense listens, and names the fault while it's still cheap to fix.</p>
+    <div class="hero-cta reveal">
+      <a class="btn-primary" href="#demo">Explore the demo</a>
+      <a class="link-arrow" href="#try">Test your own appliance &rsaquo;</a>
+    </div>
+  </div>
+  <div class="hero-info reveal">
+    <p class="hero-info-lead">The same motor, three sounds. GridSense knows the difference.</p>
+    <div class="sig-grid">
+      <div class="sig-card">
+        <canvas class="sig-scope" id="sigH" width="440" height="150" aria-hidden="true"></canvas>
+        <div class="sig-h"><i style="background:var(--ok)"></i>Healthy</div>
+        <p>An even hum. The energy stays low and steady.</p>
+      </div>
+      <div class="sig-card">
+        <canvas class="sig-scope" id="sigF" width="440" height="150" aria-hidden="true"></canvas>
+        <div class="sig-h"><i style="background:var(--crit)"></i>Bearing friction</div>
+        <p>A sharp, high-frequency grind rides on top of the hum.</p>
+      </div>
+      <div class="sig-card">
+        <canvas class="sig-scope" id="sigI" width="440" height="150" aria-hidden="true"></canvas>
+        <div class="sig-h"><i style="background:var(--warn)"></i>Imbalance</div>
+        <p>The loudness swells and fades a few times a second.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ========================= FEATURES ========================= -->
+<section class="features" id="features">
+  <div class="wrap feat-grid">
+    <div class="feat reveal">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l2-7 4 16 3-11 2 5h6"/></svg>
+      <h3>It hears the fault</h3>
+      <p>A Fast Fourier Transform breaks each sound into its frequencies, exposing the grind of a worn bearing or the wobble of an unbalanced rotor.</p>
+    </div>
+    <div class="feat reveal">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+      <h3>It runs offline</h3>
+      <p>No cloud, no account, no sensors. Just a microphone. The entire analysis on this page happens inside your browser, and nothing is sent anywhere.</p>
+    </div>
+    <div class="feat reveal">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 005.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>
+      <h3>It tells you what to do</h3>
+      <p>A 0–100 health score, the likely fault, and the concrete next step. Not a raw number you're left to interpret on your own.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== DEMO =========================== -->
+<section class="sec" id="demo">
+  <div class="wrap">
+    <div class="sec-title reveal">
+      <h2>Scan a whole home.</h2>
+      <p>Seven appliances are running. Click any one to hear it and see GridSense's diagnosis. Two of them are failing.</p>
+    </div>
+    <div class="stage">
+      <div class="panel-card plan-card reveal" aria-label="House floor plan">
+        <div class="plan-top">
+          <span class="t">Ground floor</span>
+          <div class="tools">
+            <button class="btn solid" id="scanAll">Scan all</button>
+            <button class="btn" id="soundBtn" aria-pressed="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 010 7M19 5a9 9 0 010 14"/></svg>
+              Sound on
+            </button>
+            <button class="btn" id="stopBtn">Stop</button>
+          </div>
+        </div>
+        <svg class="plan" viewBox="0 0 640 470" role="group" aria-label="Interactive floor plan">
+          <rect class="room" x="10"  y="10"  width="240" height="190" rx="5"/>
+          <rect class="room" x="250" y="10"  width="160" height="190" rx="5"/>
+          <rect class="room" x="410" y="10"  width="220" height="250" rx="5"/>
+          <rect class="room" x="10"  y="200" width="240" height="260" rx="5"/>
+          <rect class="room" x="250" y="200" width="160" height="260" rx="5"/>
+          <rect class="room" x="410" y="260" width="220" height="200" rx="5"/>
+          <text class="rlabel" x="26" y="32">KITCHEN</text>
+          <text class="rlabel" x="266" y="32">LAUNDRY</text>
+          <text class="rlabel" x="426" y="32">LIVING ROOM</text>
+          <text class="rlabel" x="26" y="222">UTILITY</text>
+          <text class="rlabel" x="266" y="222">HALL</text>
+          <text class="rlabel" x="426" y="282">GARAGE</text>
+          <g id="nodes"></g>
+        </svg>
+        <div class="legend">
+          <span><i style="background:var(--ok)"></i>Healthy</span>
+          <span><i style="background:var(--warn)"></i>Early warning</span>
+          <span><i style="background:var(--crit)"></i>Critical</span>
+          <span style="color:var(--faint)">Click a marker to begin</span>
+        </div>
+      </div>
+
+      <div class="panel-card panel reveal" id="panel" aria-live="polite">
+        <div id="panelBody">
+          <div class="empty">
+            <h3>Select an appliance</h3>
+            <p>GridSense isn't told what's wrong. It works it out from the sound alone, using the same pipeline as the desktop app.</p>
+            <ol>
+              <li>Click a machine on the plan to play its running noise.</li>
+              <li>Watch the waveform and live frequency spectrum respond.</li>
+              <li>Read the health score, the fault, and what to do next.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= HOW IT WORKS ======================= -->
+<section class="sec how">
+  <div class="wrap">
+    <div class="sec-title reveal">
+      <h2>Three steps, no hardware.</h2>
+      <p>The same path the sound takes, from microphone to maintenance.</p>
+    </div>
+    <div class="how-grid">
+      <div class="hw reveal"><div class="n"></div><h3>Capture</h3><p>Record a few seconds of a running machine, or load a sound file. A phone mic is enough.</p></div>
+      <div class="hw reveal"><div class="n"></div><h3>Analyse</h3><p>An FFT extracts the frequency fingerprint; a trained model reads the signature of each fault.</p></div>
+      <div class="hw reveal"><div class="n"></div><h3>Act</h3><p>Get a health score, the likely fault, and the specific action that heads off an expensive failure.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== TRY IT YOURSELF ====================== -->
+<section class="sec try" id="try">
+  <div class="wrap">
+    <div class="try-card reveal">
+      <h2>Try it on a real appliance.</h2>
+      <p>Pick your appliance, record a few seconds, and GridSense checks the sound against its reference acoustic profiles for that machine, then tells you whether it's running normally.</p>
+      <div class="mic-pick">
+        <label for="apSel">What are you recording?</label>
+        <select id="apSel">
+          <option value="fan">Fan</option>
+          <option value="washer">Washing machine</option>
+          <option value="dryer">Dryer</option>
+          <option value="heater">Water heater</option>
+          <option value="pump">Water pump</option>
+          <option value="fridge">Refrigerator</option>
+          <option value="hvac">HVAC / furnace blower</option>
+          <option value="motor">Other motor or fan</option>
+        </select>
+      </div>
+      <div class="rec-zone">
+        <button class="rec-btn" id="recBtn"><span class="rdot"></span>Record 3 seconds</button>
+        <div class="rec-status" id="recStatus">Hold the mic close to the appliance. Nothing is uploaded.</div>
+      </div>
+      <div class="mic-result" id="micResult"></div>
+
+      <div class="try-alt"><a class="link-arrow" href="#demo" style="color:#5AA0F0">&lsaquo; Back to the interactive demo</a></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="row"><span class="logo">Grid<b style="color:var(--blue)">Sense</b></span></div>
+    <p><b>How this demo works.</b> The seven appliance sounds are synthesised from scratch in your browser with the Web Audio API: motor hum as a fundamental plus harmonics, bearing friction as high-frequency noise bursts, imbalance as slow amplitude modulation. Each plan diagnosis is <b>computed from that audio</b> by a radix-2 FFT measuring high-frequency energy and envelope modulation depth, with thresholds calibrated against the 240-clip dataset used to train the real scikit-learn model. The microphone tool doesn't reuse those synthetic thresholds; instead it measures two noise-tolerant signatures that hold up on real audio — the spectral peakiness of the 2.5–9 kHz band (tonal grinding versus smooth airflow) and the 1–8 Hz amplitude-modulation depth (mechanical wobble) — and checks them against reference profiles for the appliance you pick. Nothing leaves this device.</p>
+  </div>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+/* ===================================================================
+   DSP core — identical to the verified desktop pipeline.
+   =================================================================== */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gauss(rnd){let u=0,v=0;while(u===0)u=rnd();while(v===0)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+const HARM=[1,0.5,0.25,0.12], PHASE=[0,1.1,2.3,0.7], NOISE=0.04, DUR=3.0;
+const SR=44100;   // fixed: keeps verdicts identical to the verified pipeline,
+                  // independent of the hardware AudioContext sample rate.
+
+function synth(a, sr){
+  const n=Math.floor(sr*DUR), y=new Float32Array(n), rnd=mulberry32(a.seed);
+  for(let i=0;i<n;i++){
+    const t=i/sr; let s=0;
+    for(let k=0;k<HARM.length;k++) s+=HARM[k]*Math.sin(2*Math.PI*a.f0*(k+1)*t+PHASE[k]);
+    if(a.kind==='friction'){
+      s+=a.sev*0.35*gauss(rnd)*(0.5+0.5*Math.abs(Math.sin(2*Math.PI*a.carrierHz*t)));
+      for(const q of a.squeals){
+        const env=Math.max(0,Math.sin(2*Math.PI*q.rate*t));
+        s+=a.sev*0.15*env*Math.sin(2*Math.PI*q.f*t);
+      }
+    } else if(a.kind==='imbalance'){
+      s*=(1+a.sev*0.6*Math.sin(2*Math.PI*a.wobbleHz*t));
+      s+=a.sev*0.3*Math.sin(2*Math.PI*a.subHz*t);
+    }
+    y[i]=s+NOISE*gauss(rnd);
+  }
+  let p=0; for(let i=0;i<n;i++) p=Math.max(p,Math.abs(y[i]));
+  if(p>0) for(let i=0;i<n;i++) y[i]/=p;
+  return y;
+}
+
+function fft(re,im){
+  const n=re.length;
+  for(let i=1,j=0;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;
+    if(i<j){const tr=re[i];re[i]=re[j];re[j]=tr;const ti=im[i];im[i]=im[j];im[j]=ti;}}
+  for(let len=2;len<=n;len<<=1){
+    const ang=-2*Math.PI/len, wr=Math.cos(ang), wi=Math.sin(ang);
+    for(let i=0;i<n;i+=len){
+      let cr=1,ci=0;
+      for(let k=0;k<len/2;k++){
+        const ur=re[i+k],ui=im[i+k];
+        const vr=re[i+k+len/2]*cr-im[i+k+len/2]*ci;
+        const vi=re[i+k+len/2]*ci+im[i+k+len/2]*cr;
+        re[i+k]=ur+vr; im[i+k]=ui+vi;
+        re[i+k+len/2]=ur-vr; im[i+k+len/2]=ui-vi;
+        const nr=cr*wr-ci*wi; ci=cr*wi+ci*wr; cr=nr;
+      }
+    }
+  }
+}
+const pow2=n=>{let p=1;while(p*2<=n)p*=2;return p;};
+
+function analyze(y, sr){
+  const N=Math.min(65536,pow2(y.length));
+  const re=new Float64Array(N), im=new Float64Array(N);
+  for(let i=0;i<N;i++) re[i]=y[i]*(0.5-0.5*Math.cos(2*Math.PI*i/(N-1)));
+  fft(re,im);
+  let tot=0,hi=0,cw=0,magSum=0,peak=0,peakBin=1;
+  const half=N/2;
+  for(let k=1;k<half;k++){
+    const m2=re[k]*re[k]+im[k]*im[k], f=k*sr/N, m=Math.sqrt(m2);
+    tot+=m2; if(f>=3000) hi+=m2; cw+=m*f; magSum+=m;
+    if(m2>peak){peak=m2;peakBin=k;}
+  }
+  // Anti-aliased envelope: rectify -> box low-pass at FULL rate -> then decimate.
+  // Filtering before decimation stops a ~50 Hz fundamental folding into the
+  // 1-6 Hz wobble band and faking an imbalance on a healthy machine.
+  const W=Math.max(1,Math.round(sr*0.03));
+  const pre=new Float64Array(y.length+1);
+  for(let i=0;i<y.length;i++) pre[i+1]=pre[i]+Math.abs(y[i]);
+  const M=Math.max(1,Math.round(sr/200));
+  const env=[];
+  for(let i=0;i<y.length;i+=M){
+    const a=Math.max(0,i-(W>>1)), b=Math.min(y.length,i+(W>>1));
+    env.push((pre[b]-pre[a])/Math.max(1,b-a));
+  }
+  let mod=0;
+  const EN=pow2(env.length);
+  if(EN>=16){
+    let mean=0; for(let i=0;i<EN;i++) mean+=env[i]; mean/=EN;
+    const er=new Float64Array(EN), ei=new Float64Array(EN);
+    for(let i=0;i<EN;i++) er[i]=env[i]-mean;
+    fft(er,ei);
+    const eRate=sr/M; let sum=0,bandMax=0;
+    for(let k=1;k<EN/2;k++){
+      const m=Math.hypot(er[k],ei[k]), f=k*eRate/EN;
+      sum+=m; if(f>=1&&f<=6) bandMax=Math.max(bandMax,m);
+    }
+    mod=sum>0?bandMax/sum:0;
+  }
+  return {hf:tot>0?hi/tot:0, mod, centroid:magSum>0?cw/magSum:0, dominantHz:peakBin*sr/N};
+}
+
+/* Thresholds calibrated against the real 240-clip training set. */
+const HF_LO=0.013, HF_HI=0.045, MOD_LO=0.0112, MOD_HI=0.1824;
+const cl=x=>Math.min(Math.max(x,0),1);
+
+function diagnose(m){
+  const fr=cl((m.hf-HF_LO)/(HF_HI-HF_LO));
+  const im=cl((m.mod-MOD_LO)/(MOD_HI-MOD_LO));
+  const fault=Math.max(fr,im), health=100*(1-fault);
+  const status = health>=75?'Healthy' : health>=40?'Early Warning':'Critical Failure';
+  const label  = fault<0.15?'healthy' : (fr>=im?'friction':'imbalance');
+  const raw={healthy:1-fault, friction:fr, imbalance:im};
+  const s=(raw.healthy+raw.friction+raw.imbalance)||1;
+  return {health,status,label,
+          conf:{healthy:raw.healthy/s,friction:raw.friction/s,imbalance:raw.imbalance/s}};
+}
+
+const APPLIANCES=[
+ {id:'fridge',name:'Refrigerator',      room:'Kitchen',    x:80, y:95, kind:'healthy', sev:0,    f0:55,seed:11},
+ {id:'dish',  name:'Dishwasher',        room:'Kitchen',    x:190,y:165,kind:'friction',sev:0.45, f0:60,seed:22,carrierHz:3800,squeals:[{f:4200,rate:2.2},{f:5600,rate:3.1}]},
+ {id:'washer',name:'Washing machine',   room:'Laundry',    x:330,y:105,kind:'friction',sev:0.55, f0:50,seed:33,carrierHz:4400,squeals:[{f:5200,rate:1.8},{f:6600,rate:2.6}]},
+ {id:'fan',   name:'Ceiling fan',       room:'Living room',x:520,y:130,kind:'imbalance',sev:0.10,f0:45,seed:44,wobbleHz:2.4,subHz:26},
+ {id:'hvac',  name:'HVAC blower',       room:'Utility',    x:85, y:300,kind:'imbalance',sev:0.06,f0:65,seed:55,wobbleHz:1.9,subHz:30},
+ {id:'pump',  name:'Water pump',        room:'Utility',    x:190,y:400,kind:'healthy', sev:0,    f0:70,seed:66},
+ {id:'garage',name:'Garage door opener',room:'Garage',     x:520,y:370,kind:'friction',sev:0.50, f0:40,seed:77,carrierHz:3400,squeals:[{f:3900,rate:2.8},{f:5100,rate:3.6}]},
+];
+
+/* ===================================================================
+   Presentation layer
+   =================================================================== */
+const LIGHT={'Healthy':'#157F45','Early Warning':'#8A5A00','Critical Failure':'#CF2436'};
+const VIVID={'Healthy':'#30C070','Early Warning':'#F5A623','Critical Failure':'#FF5A48'};
+const CONF_COL={healthy:'#157F45',friction:'#CF2436',imbalance:'#8A5A00'};
+const FAINT='#86868B';
+
+/* ---------- audio ---------- */
+let ctx=null, srcNode=null, analyser=null, gainNode=null;
+let current=null, rafId=0, soundOn=true, startedAt=0;
+const cache={};
+
+async function ensureCtx(){
+  if(!ctx){
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    gainNode=ctx.createGain(); gainNode.gain.value=2.6;    // drive it loud
+    // Compressor as a PEAK LIMITER only (high threshold, light knee) so it
+    // catches clipping without squashing overall loudness the way the old
+    // low-threshold/high-ratio setting did (that made everything too quiet).
+    const comp=ctx.createDynamicsCompressor();
+    comp.threshold.value=-2; comp.knee.value=4; comp.ratio.value=8;
+    comp.attack.value=0.003; comp.release.value=0.12;
+    analyser=ctx.createAnalyser(); analyser.fftSize=2048; analyser.smoothingTimeConstant=0.75;
+    gainNode.connect(comp); comp.connect(analyser); analyser.connect(ctx.destination);
+  }
+  if(ctx.state!=='running'){ try{ await ctx.resume(); }catch(e){} }
+  return ctx;
+}
+function compute(a){
+  if(cache[a.id]) return cache[a.id];
+  const buf=synth(a,SR), metrics=analyze(buf,SR);
+  cache[a.id]={buf,metrics,diag:diagnose(metrics),sr:SR};
+  return cache[a.id];
+}
+function stopAudio(){
+  if(srcNode){try{srcNode.stop();}catch(e){} try{srcNode.disconnect();}catch(e){} srcNode=null;}
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('playing'));
+  cancelAnimationFrame(rafId); rafId=0;
+}
+async function play(a,rec){
+  stopAudio();
+  if(!soundOn) return;
+  await ensureCtx();                        // AWAIT resume before starting — the fix for silent playback
+  const ab=ctx.createBuffer(1,rec.buf.length,rec.sr);
+  ab.copyToChannel(rec.buf,0);
+  srcNode=ctx.createBufferSource();
+  srcNode.buffer=ab; srcNode.loop=true; srcNode.connect(gainNode);
+  startedAt=ctx.currentTime; srcNode.start();
+  const g=document.getElementById('n_'+a.id); if(g) g.classList.add('playing');
+  loopDraw(rec);
+}
+async function playBuffer(buf,sr){        // one-shot playback (recording review)
+  stopAudio();
+  await ensureCtx();
+  const ab=ctx.createBuffer(1,buf.length,sr);
+  ab.copyToChannel(buf,0);
+  srcNode=ctx.createBufferSource();
+  srcNode.buffer=ab; srcNode.connect(gainNode);
+  srcNode.start();
+}
+
+/* ---------- plan nodes ---------- */
+const SVGNS='http://www.w3.org/2000/svg';
+const nodesG=document.getElementById('nodes');
+function buildNodes(){
+  APPLIANCES.forEach(a=>{
+    const g=document.createElementNS(SVGNS,'g');
+    g.setAttribute('class','node'); g.setAttribute('id','n_'+a.id);
+    g.setAttribute('tabindex','0'); g.setAttribute('role','button');
+    g.setAttribute('aria-label',a.name+' in the '+a.room+'. Not scanned yet.');
+    g.innerHTML=
+      `<circle class="ping" cx="${a.x}" cy="${a.y}" r="15" fill="none" stroke="${FAINT}" stroke-width="2" opacity="0"/>`+
+      `<circle class="ring" cx="${a.x}" cy="${a.y}" r="15"/>`+
+      `<circle class="ndot" cx="${a.x}" cy="${a.y}" r="5" fill="${FAINT}"/>`+
+      `<text class="nlabel" x="${a.x}" y="${a.y+30}">${a.name}</text>`;
+    g.addEventListener('click',()=>select(a));
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(a);}});
+    nodesG.appendChild(g);
+  });
+}
+function paintNode(a,diag){
+  const g=document.getElementById('n_'+a.id); if(!g) return;
+  const c=LIGHT[diag.status];
+  g.querySelector('.ndot').setAttribute('fill',c);
+  g.querySelector('.ring').setAttribute('stroke',c);
+  g.querySelector('.ping').setAttribute('stroke',c);
+  g.setAttribute('aria-label',`${a.name} in the ${a.room}. ${diag.status}, health ${Math.round(diag.health)} out of 100.`);
+}
+
+/* ---------- copy ---------- */
+function reading(name,d,m){
+  if(d.label==='healthy')
+    return `The ${name} sounds normal. Energy sits in the expected low-frequency hum near ${m.dominantHz.toFixed(0)} Hz, with nothing unusual higher up and no wobble in the envelope.`;
+  if(d.label==='friction')
+    return `GridSense hears high-frequency grinding. ${(m.hf*100).toFixed(1)}% of the sound energy is above 3 kHz, the signature of metal-on-metal bearing wear, and that's audible long before a bearing seizes.`;
+  return `GridSense hears a slow wobble: the loudness rises and falls a few times a second, which is what a rotating mass spinning off-centre sounds like. The hum itself is clean, so this is mechanical, not friction.`;
+}
+function nextSteps(name,d,m){
+  if(d.label==='healthy') return [
+    ['No action needed',`Baseline is nominal for the ${name}. Re-scan on your usual schedule so you can catch drift early.`]];
+  if(d.label==='friction') return [
+    ['Re-lubricate the bearings',`${(m.hf*100).toFixed(1)}% of energy above 3 kHz points to dry or worn bearings, often fixed with lubrication.`],
+    ['Inspect the shaft and races','Look for scoring. If the grinding persists after lubrication, replace the bearing.'],
+    ...(d.status==='Critical Failure'?[['Schedule downtime soon','The signature is strong. Planned downtime is far cheaper than a seizure mid-cycle.']]:[])];
+  return [
+    ['Check balance and alignment','The rotating mass is off-centre. On a fan this is often dust build-up or a bent blade.'],
+    ['Re-torque mounts and couplings','Loose mounts produce an identical wobble, the cheapest cause to rule out first.'],
+    ...(d.status==='Critical Failure'?[['Take the unit offline','An unbalanced rotor accelerates bearing wear, so this becomes a second fault if left running.']]:[])];
+}
+
+/* shared analysis markup — used by both the appliance panel and the mic result */
+function analysisMarkup(m,d,name,ids){
+  const cL=LIGHT[d.status];
+  const bars=['healthy','friction','imbalance'].sort((p,q)=>d.conf[q]-d.conf[p]).map(k=>
+    `<div class="bar"><div class="k">${k[0].toUpperCase()+k.slice(1)}</div>
+     <div class="t"><div class="f" data-w="${(d.conf[k]*100).toFixed(1)}" style="background:${CONF_COL[k]}"></div></div>
+     <div class="v">${(d.conf[k]*100).toFixed(0)}%</div></div>`).join('');
+  const steps=nextSteps(name,d,m).map(([t,dd],i)=>
+    `<div class="step"><div class="n">${i+1}</div><div class="b"><div class="t">${t}</div><div class="d">${dd}</div></div></div>`).join('');
+  return `
+    <div class="verdict"><i style="background:${cL}"></i><span style="color:${cL}">${d.status}</span></div>
+    <p class="reading">${reading(name,d,m)}</p>
+    <div class="meter">
+      <div class="meter-top"><span class="l">Machine Health Index</span>
+        <span class="v" style="color:${cL}">${d.health.toFixed(0)}<small>/100</small></span></div>
+      <div class="track"><div class="fill" style="background:${cL}"></div></div>
+      <div class="ticks"><span style="left:0;transform:none">0</span>
+        <span style="left:40%">40 · warning</span><span style="left:75%">75 · healthy</span>
+        <span style="left:100%;transform:translateX(-100%)">100</span></div>
+    </div>
+    <div class="strip">
+      <div class="cell"><div class="k">Detected fault</div><div class="v" style="color:${cL}">${d.label[0].toUpperCase()+d.label.slice(1)}</div></div>
+      <div class="cell"><div class="k">Dominant freq.</div><div class="v">${m.dominantHz.toFixed(0)} <small>Hz</small></div></div>
+      <div class="cell"><div class="k">Energy &gt; 3 kHz</div><div class="v">${(m.hf*100).toFixed(1)} <small>%</small></div></div>
+      <div class="cell"><div class="k">Wobble depth</div><div class="v">${(m.mod*100).toFixed(1)} <small>%</small></div></div>
+    </div>
+    <div class="screen">
+      <h4>WAVEFORM</h4>
+      <canvas class="scope" id="${ids.wave}" width="900" height="200"></canvas>
+      <div class="cap">Loudness over time. A steady band is smooth running; a repeating bulge is the wobble of an unbalanced rotor.</div>
+      <h4>FREQUENCY SPECTRUM</h4>
+      <canvas class="scope" id="${ids.spec}" width="900" height="200"></canvas>
+      <div class="cap">Low frequencies on the left, high on the right. Activity past the 3&nbsp;kHz line is the grinding signature of bearing friction.</div>
+    </div>
+    <div class="subhead">CONFIDENCE</div>
+    <div class="bars">${bars}</div>
+    <div class="subhead">NEXT STEPS</div>
+    <div class="steps">${steps}</div>`;
+}
+function animate(container,d){
+  requestAnimationFrame(()=>{
+    const f=container.querySelector('.fill');
+    if(f) f.style.transform='translateX('+(-(100-Math.max(d.health,1.5)))+'%)';
+    container.querySelectorAll('.bar .f').forEach(el=>{
+      el.style.transform='translateX('+(-(100-parseFloat(el.dataset.w)))+'%)';
+    });
+  });
+}
+
+function select(a){
+  const rec=compute(a), {diag:d, metrics:m}=rec;
+  paintNode(a,d);
+  const body=document.getElementById('panelBody');
+  body.innerHTML=`<div class="pl-head"><h3>${a.name}</h3><span class="sub">${a.room}</span></div>`
+    + analysisMarkup(m,d,a.name.toLowerCase(),{wave:'wave',spec:'spec'});
+  animate(body,d);
+  current=a;
+  drawWaveInto('wave',rec.buf,VIVID[d.status],0);
+  if(soundOn) play(a,rec); else drawSpecStatic('spec');
+}
+
+/* ---------- canvases ---------- */
+function drawWaveInto(id,buf,color,progress){
+  const cv=document.getElementById(id); if(!cv) return;
+  const g=cv.getContext('2d'), W=cv.width, H=cv.height;
+  g.clearRect(0,0,W,H);
+  g.strokeStyle='#2A2A2E'; g.lineWidth=1; g.beginPath(); g.moveTo(0,H/2); g.lineTo(W,H/2); g.stroke();
+  const step=Math.floor(buf.length/W)||1;
+  g.strokeStyle=color; g.lineWidth=1.4; g.beginPath();
+  for(let x=0;x<W;x++){
+    let mn=1,mx=-1;
+    for(let i=x*step;i<(x+1)*step&&i<buf.length;i++){mn=Math.min(mn,buf[i]);mx=Math.max(mx,buf[i]);}
+    g.moveTo(x+.5,H/2-mn*H*0.45); g.lineTo(x+.5,H/2-mx*H*0.45);
+  }
+  g.stroke();
+  if(progress>0){
+    g.strokeStyle='rgba(255,255,255,.55)'; g.lineWidth=1;
+    g.beginPath(); g.moveTo(progress*W,0); g.lineTo(progress*W,H); g.stroke();
+  }
+}
+function drawSpecStatic(id){
+  const cv=document.getElementById(id); if(!cv) return;
+  const g=cv.getContext('2d'), W=cv.width, H=cv.height;
+  g.clearRect(0,0,W,H);
+  g.fillStyle='#7C7C82'; g.font='15px sans-serif'; g.textAlign='center';
+  g.fillText('Turn sound on to see the live spectrum', W/2, H/2+5);
+  g.textAlign='left';
+}
+/* static spectrum from an arbitrary buffer (used for the mic result) */
+function drawStaticSpectrum(id,buf,sr){
+  const cv=document.getElementById(id); if(!cv) return;
+  const g=cv.getContext('2d'), W=cv.width, H=cv.height;
+  g.clearRect(0,0,W,H);
+  const N=Math.min(32768,pow2(buf.length));
+  if(N<16){return;}
+  const re=new Float64Array(N), im=new Float64Array(N);
+  for(let i=0;i<N;i++) re[i]=buf[i]*(0.5-0.5*Math.cos(2*Math.PI*i/(N-1)));
+  fft(re,im);
+  const maxF=10000, bins=200;
+  const mags=new Float64Array(bins); let mx=1e-9;
+  for(let b=0;b<bins;b++){
+    const k0=Math.max(1,Math.floor((b/bins*maxF)*N/sr));
+    const k1=Math.min(N/2-1,Math.ceil(((b+1)/bins*maxF)*N/sr));
+    let s=0,c=0; for(let k=k0;k<=k1;k++){s+=Math.hypot(re[k],im[k]);c++;}
+    mags[b]=c?s/c:0; mx=Math.max(mx,mags[b]);
+  }
+  const bw=W/bins;
+  for(let b=0;b<bins;b++){
+    const h=(mags[b]/mx)*H*0.95, f=b/bins*maxF;
+    g.fillStyle=f>=3000?'#FF5A48':'#5A5A62'; g.globalAlpha=f>=3000?0.95:0.7;
+    g.fillRect(b*bw,H-h,Math.max(bw-0.5,0.6),h);
+  }
+  g.globalAlpha=1;
+  const x3k=(3000/maxF)*W;
+  g.strokeStyle='#4A4A50'; g.setLineDash([4,4]); g.beginPath(); g.moveTo(x3k,0); g.lineTo(x3k,H); g.stroke(); g.setLineDash([]);
+  g.fillStyle='#7C7C82'; g.font='11px sans-serif'; g.fillText('3 kHz',x3k+5,13);
+}
+function loopDraw(rec){
+  const bins=new Uint8Array(analyser.frequencyBinCount);
+  const tick=()=>{
+    if(!srcNode){return;}
+    drawWaveInto('wave',rec.buf,VIVID[rec.diag.status],((ctx.currentTime-startedAt)%DUR)/DUR);
+    const spec=document.getElementById('spec');
+    if(spec){
+      analyser.getByteFrequencyData(bins);
+      const g=spec.getContext('2d'), W=spec.width, H=spec.height;
+      g.clearRect(0,0,W,H);
+      const nyq=ctx.sampleRate/2, n=Math.floor(bins.length*0.45), bw=W/n;
+      for(let i=0;i<n;i++){
+        const v=bins[i]/255, h=v*H, f=(i/bins.length)*nyq;
+        g.fillStyle=f>=3000?'#FF5A48':'#5A5A62'; g.globalAlpha=f>=3000?0.95:0.7;
+        g.fillRect(i*bw,H-h,Math.max(bw-0.5,0.6),h);
+      }
+      g.globalAlpha=1;
+      const x3k=(3000/nyq)*n*bw;
+      g.strokeStyle='#4A4A50'; g.setLineDash([4,4]); g.lineWidth=1;
+      if(x3k<W){g.beginPath();g.moveTo(x3k,0);g.lineTo(x3k,H);g.stroke();}
+      g.setLineDash([]); g.fillStyle='#7C7C82'; g.font='11px sans-serif';
+      if(x3k<W-40) g.fillText('3 kHz',x3k+5,13);
+    }
+    rafId=requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+/* ---------- hero: three fault-signature scopes ---------- */
+(function heroSignatures(){
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const defs=[
+    {id:'sigH', color:VIVID['Healthy'],          a:{kind:'healthy', sev:0,   f0:60, seed:11}},
+    {id:'sigF', color:VIVID['Critical Failure'], a:{kind:'friction',sev:0.9, f0:55, seed:22, carrierHz:4200, squeals:[{f:4800,rate:2},{f:6200,rate:3}]}},
+    {id:'sigI', color:VIVID['Early Warning'],     a:{kind:'imbalance',sev:0.5,f0:50, seed:44, wobbleHz:3, subHz:26}},
+  ];
+  const scopes=[];
+  for(const d of defs){
+    const cv=document.getElementById(d.id); if(!cv) continue;
+    const g=cv.getContext('2d'), W=cv.width, H=cv.height;
+    const buf=synth(d.a, 8000);                 // low sr: cheap, plenty for a thumbnail
+    // pre-reduce to per-column min/max so the sweep is cheap to redraw
+    const cols=W, step=Math.floor(buf.length/cols)||1, mn=new Float32Array(cols), mx=new Float32Array(cols);
+    for(let x=0;x<cols;x++){ let lo=1,hi=-1; for(let i=x*step;i<(x+1)*step&&i<buf.length;i++){lo=Math.min(lo,buf[i]);hi=Math.max(hi,buf[i]);} mn[x]=lo; mx[x]=hi; }
+    scopes.push({g,W,H,mn,mx,color:d.color});
+  }
+  function draw(prog){
+    for(const s of scopes){
+      const {g,W,H,mn,mx,color}=s;
+      g.clearRect(0,0,W,H);
+      g.strokeStyle='#26262A'; g.lineWidth=1; g.beginPath(); g.moveTo(0,H/2); g.lineTo(W,H/2); g.stroke();
+      const head=prog*W;
+      for(let x=0;x<W;x++){
+        const past=x<=head;
+        g.strokeStyle=color; g.globalAlpha=past?1:0.32; g.lineWidth=1.4;
+        g.beginPath(); g.moveTo(x+.5,H/2-mn[x]*H*0.42); g.lineTo(x+.5,H/2-mx[x]*H*0.42); g.stroke();
+      }
+      g.globalAlpha=1;
+      if(prog>0&&prog<1){ g.strokeStyle='rgba(255,255,255,.6)'; g.lineWidth=1; g.beginPath(); g.moveTo(head,0); g.lineTo(head,H); g.stroke(); }
+    }
+  }
+  if(reduce){ draw(1); return; }
+  let t=0;
+  (function loop(){ t+=0.006; if(t>1.25) t=0; draw(Math.min(t,1)); requestAnimationFrame(loop); })();
+})();
+
+/* ---------- demo controls ---------- */
+document.getElementById('stopBtn').addEventListener('click',stopAudio);
+const soundBtn=document.getElementById('soundBtn');
+const ICON_ON='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 010 7M19 5a9 9 0 010 14"/></svg> Sound on';
+const ICON_OFF='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/></svg> Sound off';
+soundBtn.addEventListener('click',()=>{
+  soundOn=!soundOn;
+  soundBtn.innerHTML = soundOn?ICON_ON:ICON_OFF;
+  soundBtn.setAttribute('aria-pressed',String(soundOn));
+  if(!soundOn){stopAudio(); drawSpecStatic('spec');}
+  else if(current) play(current,compute(current));
+});
+document.getElementById('scanAll').addEventListener('click',()=>{
+  stopAudio();
+  APPLIANCES.forEach(a=>paintNode(a,compute(a).diag));
+  const worst=APPLIANCES.map(a=>({a,d:cache[a.id].diag})).sort((p,q)=>p.d.health-q.d.health)[0];
+  if(worst) select(worst.a);
+});
+/* ---------- microphone: single-clip analysis against reference profiles ----
+   The earlier failure was flagging a healthy FAN as "critical" because a fan is
+   mostly broadband air noise and the old test measured total high-frequency
+   energy. The fix: robust, noise-tolerant features —
+     - GRINDING (bearing friction): spectral crest in the 2.5-9 kHz band. Sharp
+       tonal squeals sit far above the band's median; smooth air noise does not,
+       so a loud fan reads ~3-4 while a grinding bearing reads 20-1000+.
+     - WOBBLE (imbalance/looseness): amplitude modulation depth at 1-8 Hz.
+   A reference table per appliance type sets expectations and tailors advice. */
+let mediaStream=null, mediaRec=null, recChunks=[], recCountdown=0, recStop=0, recActive=null;
+
+const REF={
+  fan:    {label:'Fan',                    note:'Fans are mostly airflow, so broadband hiss is normal. GridSense listens for a wobble or metallic grinding instead.'},
+  washer: {label:'Washing machine',        note:'The motor and drum should run smoothly. Watch for drum imbalance and bearing grind.'},
+  dryer:  {label:'Dryer',                  note:'Dryers mix airflow with a tumbling drum. Watch for a thumping wobble (worn rollers) or a belt/bearing squeal.'},
+  heater: {label:'Water heater',           note:'Mostly quiet; a low rumble is often sediment and a steady whine can be the burner or a valve.'},
+  pump:   {label:'Water pump',             note:'Should hum steadily. Grinding points to bearing wear; a low wobble points to cavitation or imbalance.'},
+  fridge: {label:'Refrigerator',           note:'The compressor should hum evenly. Watch for a buzzing rattle or a grinding fan.'},
+  hvac:   {label:'HVAC / furnace blower',  note:'Blowers move a lot of air. Watch for a wheel imbalance (wobble) or a bearing squeal.'},
+  motor:  {label:'Motor or fan',           note:'GridSense checks any small motor for mechanical wobble and bearing grind.'}
+};
+
+/* robust single-clip features */
+function analyzeMic(y, sr){
+  const N=Math.min(65536,pow2(y.length));
+  const re=new Float64Array(N), im=new Float64Array(N);
+  for(let i=0;i<N;i++) re[i]=y[i]*(0.5-0.5*Math.cos(2*Math.PI*i/(N-1)));
+  fft(re,im);
+  const half=N/2, mag=new Float64Array(half); let magMean=0;
+  for(let k=1;k<half;k++){ mag[k]=Math.hypot(re[k],im[k]); magMean+=mag[k]; }
+  magMean/=(half-1);
+  const fOf=k=>k*sr/N;
+  // fundamental = strongest peak 20-500 Hz, and its prominence over the mean
+  let pk=0,pb=1; for(let k=1;k<half;k++){const f=fOf(k); if(f>=20&&f<=500&&mag[k]>pk){pk=mag[k];pb=k;}}
+  const fundProm = magMean>0 ? pk/magMean : 0;
+  // grinding = crest (max/median) in the 2.5-9 kHz band
+  const hiArr=[]; for(let k=1;k<half;k++){const f=fOf(k); if(f>=2500&&f<=9000) hiArr.push(mag[k]);}
+  hiArr.sort((a,b)=>a-b);
+  const med=hiArr.length?hiArr[hiArr.length>>1]:0, mx=hiArr.length?hiArr[hiArr.length-1]:0;
+  const grind = med>0 ? mx/med : 0;
+  // wobble = 1-8 Hz envelope modulation depth (anti-aliased)
+  const W=Math.max(1,Math.round(sr*0.03)); const pre=new Float64Array(y.length+1);
+  for(let i=0;i<y.length;i++) pre[i+1]=pre[i]+Math.abs(y[i]);
+  const Md=Math.max(1,Math.round(sr/200)); const env=[];
+  for(let i=0;i<y.length;i+=Md){const a=Math.max(0,i-(W>>1)),b=Math.min(y.length,i+(W>>1)); env.push((pre[b]-pre[a])/Math.max(1,b-a));}
+  let mod=0; const EN=pow2(env.length);
+  if(EN>=16){ let mean=0; for(let i=0;i<EN;i++) mean+=env[i]; mean/=EN;
+    const er=new Float64Array(EN), ei=new Float64Array(EN); for(let i=0;i<EN;i++) er[i]=env[i]-mean; fft(er,ei);
+    const eR=sr/Md; let sum=0,bmax=0; for(let k=1;k<EN/2;k++){const mm=Math.hypot(er[k],ei[k]),ff=k*eR/EN; sum+=mm; if(ff>=1&&ff<=8) bmax=Math.max(bmax,mm);} mod=sum>0?bmax/sum:0; }
+  return {dominantHz:fOf(pb), grind, mod, fundProm};
+}
+
+/* thresholds calibrated on the physics-based reference signatures */
+const GR_MILD=8, GR_STRONG=45, MOD_MILD=0.045, MOD_STRONG=0.12;
+
+function diagnoseMic(f, ref){
+  const fri = f.grind>=GR_STRONG?2 : f.grind>=GR_MILD?1 : 0;
+  const imb = f.mod  >=MOD_STRONG?2 : f.mod  >=MOD_MILD?1 : 0;
+  const sev = Math.max(fri,imb);
+  const findings=[];
+  if(imb) findings.push({label:'imbalance', sev:imb,
+    title:'Wobble — likely imbalance', color:imb>=2?LIGHT['Critical Failure']:LIGHT['Early Warning'],
+    detail:`The loudness rises and falls about ${(f.mod*100).toFixed(0)}% a few times a second. That once-per-turn wobble is a rotating part running off-centre.`,
+    steps:[['Check balance and mounting','Look for dust build-up, a bent blade, or loose mounting bolts, the cheapest causes to rule out first.'],
+           ...(imb>=2?[['Reduce running time until checked','A strong imbalance accelerates bearing wear.']]:[['Re-check after cleaning','Confirm whether balancing or cleaning settles it.']])]});
+  if(fri) findings.push({label:'friction', sev:fri,
+    title:'Grinding — likely bearing wear', color:fri>=2?LIGHT['Critical Failure']:LIGHT['Early Warning'],
+    detail:`GridSense hears sharp, tonal high-frequency energy (about ${f.grind.toFixed(0)}× above the surrounding noise). Smooth airflow doesn't do that; metal-on-metal grinding does.`,
+    steps:[['Inspect and re-lubricate the bearings','Check for dryness or wear. A dry bearing often quietens after lubrication.'],
+           ...(fri>=2?[['Plan a service soon','The grinding is pronounced. Catching it now is far cheaper than a seizure.']]:[['Listen again in a day or two','Confirm the trend before replacing parts.']])]});
+
+  const status = sev>=2?'Critical Failure' : sev===1?'Early Warning':'Healthy';
+  const faint = f.fundProm < 5;
+  let headline, reading;
+  if(sev===0){
+    headline='Sounds like it’s running normally';
+    reading=`No grinding and no wobble stand out against ${ref.label.toLowerCase()} noise. The sound is steady, which is what a healthy unit should be.`;
+  } else if(sev===1){
+    headline='Worth a closer look';
+    reading=`Mostly normal, but one early fault signature showed up. It’s not severe yet, so treat this as a heads-up rather than an emergency.`;
+  } else {
+    headline='Needs attention';
+    reading=`A clear fault signature is present. Acting on it now is far cheaper than waiting for the machine to fail.`;
+  }
+  return {status, headline, reading, findings, faint};
+}
+
+function recordClip(statusEl, btnEl, idleHTML, onDone){
+  if(mediaRec && mediaRec.state==='recording'){ stopRecording(); return; }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    statusEl.textContent='Microphone is not available in this browser. Use the desktop app below.'; return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})
+  .then(stream=>{
+    mediaStream=stream; recChunks=[];
+    try{ mediaRec=new MediaRecorder(stream); }
+    catch(e){ statusEl.textContent='Recording is not supported in this browser. Use the desktop app below.'; releaseStream(); return; }
+    recActive={statusEl,btnEl,idleHTML,onDone};
+    mediaRec.ondataavailable=e=>{ if(e.data && e.data.size) recChunks.push(e.data); };
+    mediaRec.onstop=()=>{ const blob=new Blob(recChunks,{type:(recChunks[0]&&recChunks[0].type)||'audio/webm'}); releaseStream(); finishClip(blob); };
+    stopAudio();
+    mediaRec.start();
+    btnEl.classList.add('recording'); btnEl.innerHTML='<span class="rdot"></span>Listening… tap to stop';
+    let left=3; statusEl.textContent='Listening… '+left+'s';
+    recCountdown=setInterval(()=>{ left--; if(left>0) statusEl.textContent='Listening… '+left+'s'; },1000);
+    recStop=setTimeout(stopRecording,3200);
+  })
+  .catch(e=>{ statusEl.textContent='Microphone permission was blocked. Allow mic access and try again.'; });
+}
+function stopRecording(){
+  clearInterval(recCountdown); clearTimeout(recStop);
+  if(mediaRec && mediaRec.state==='recording'){ try{mediaRec.stop();}catch(e){} }
+  if(recActive){ recActive.btnEl.classList.remove('recording'); recActive.btnEl.innerHTML=recActive.idleHTML; recActive.statusEl.textContent='Analysing…'; }
+}
+function releaseStream(){ if(mediaStream){ mediaStream.getTracks().forEach(t=>t.stop()); mediaStream=null; } }
+async function finishClip(blob){
+  const act=recActive; recActive=null; if(!act) return;
+  try{
+    const arr=await blob.arrayBuffer(); await ensureCtx();
+    const audioBuf=await ctx.decodeAudioData(arr);
+    const raw=audioBuf.getChannelData(0), sr=audioBuf.sampleRate;
+    if(audioBuf.duration<0.6){ act.statusEl.textContent="Didn't catch enough audio. Try again, a little closer to the machine."; return; }
+    let peak=0; for(let i=0;i<raw.length;i++){const v=Math.abs(raw[i]); if(v>peak)peak=v;}
+    if(peak<0.004){ act.statusEl.textContent='That was almost silent. Check your microphone and try again.'; return; }
+    const y=new Float32Array(raw.length);
+    for(let i=0;i<raw.length;i++) y[i]=raw[i]/peak;   // normalise, like load_audio()
+    act.onDone(y, sr, act.statusEl);
+  }catch(e){ act.statusEl.textContent='Could not read that audio ('+(e.message||e)+'). Use the desktop app below.'; }
+}
+
+const REC_IDLE='<span class="rdot"></span>Record 3 seconds';
+const recBtn=document.getElementById('recBtn');
+const recStatus=document.getElementById('recStatus');
+const apSel=document.getElementById('apSel');
+
+recBtn.addEventListener('click',()=>recordClip(recStatus,recBtn,REC_IDLE,(y,sr,st)=>{
+  const ref=REF[apSel.value]||REF.motor;
+  const f=analyzeMic(y,sr);
+  renderMicResult(ref,f,diagnoseMic(f,ref),y,sr);
+  st.textContent='Done. Record again anytime.';
+}));
+
+function renderMicResult(ref, f, d, buf, sr){
+  const c=LIGHT[d.status];
+  const findingsHtml = d.findings.length
+    ? d.findings.map(x=>`<div class="finding"><div class="ft"><i style="background:${x.color}"></i>${x.title}</div><div class="fd">${x.detail}</div></div>`).join('')
+    : `<div class="finding"><div class="ft"><i style="background:${LIGHT['Healthy']}"></i>No fault signatures found</div><div class="fd">Neither grinding nor wobble stands out. ${ref.note}</div></div>`;
+  const steps = d.findings.flatMap(x=>x.steps);
+  const stepsHtml = steps.length
+    ? '<div class="subhead">NEXT STEPS</div><div class="steps">'+steps.map(([t,dd],i)=>`<div class="step"><div class="n">${i+1}</div><div class="b"><div class="t">${t}</div><div class="d">${dd}</div></div></div>`).join('')+'</div>'
+    : '<div class="subhead">NEXT STEPS</div><div class="steps"><div class="step"><div class="n">1</div><div class="b"><div class="t">Keep an ear on it</div><div class="d">Nothing to do now. Re-record occasionally, or the moment the sound changes.</div></div></div></div>';
+  const box=document.getElementById('micResult');
+  box.innerHTML=`<div class="panel-card panel">
+    <div class="pl-head"><h3>${ref.label}</h3><span class="sub">${(buf.length/sr).toFixed(1)}s · your microphone</span></div>
+    <div class="verdict"><i style="background:${c}"></i><span style="color:${c}">${d.headline}</span></div>
+    <p class="reading">${d.reading}${d.faint?' <em style="color:var(--faint)">(The machine was faint here — move the mic closer for a more confident read.)</em>':''}</p>
+    <div class="strip">
+      <div class="cell"><div class="k">Running frequency</div><div class="v">${f.dominantHz.toFixed(0)} <small>Hz</small></div></div>
+      <div class="cell"><div class="k">Grinding index</div><div class="v" ${f.grind>=GR_MILD?`style="color:${LIGHT['Critical Failure']}"`:''}>${f.grind.toFixed(0)}<small>×</small></div></div>
+      <div class="cell"><div class="k">Wobble depth</div><div class="v" ${f.mod>=MOD_MILD?`style="color:${LIGHT['Early Warning']}"`:''}>${(f.mod*100).toFixed(0)} <small>%</small></div></div>
+    </div>
+    <div class="screen"><h4>FREQUENCY SPECTRUM</h4><canvas class="scope" id="micSpec" width="900" height="200"></canvas>
+      <div class="cap">Your recording. A sharp spike past the 3&nbsp;kHz line is grinding; broadband hiss without spikes is normal airflow.</div></div>
+    <div class="findings">${findingsHtml}</div>
+    ${stepsHtml}
+    <button class="btn" id="playRec" style="margin-top:1.4rem">▶ Play the recording back</button>
+    <p class="ref-note">Checked against GridSense's reference profile for a ${ref.label.toLowerCase()}. It's a screening aid, not a substitute for a proper inspection.</p>
+  </div>`;
+  drawStaticSpectrum('micSpec',buf,sr);
+  document.getElementById('playRec').addEventListener('click',()=>playBuffer(buf,sr));
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* resume audio on any first gesture, in case the browser suspended it */
+['pointerdown','keydown','touchstart'].forEach(ev=>
+  window.addEventListener(ev,()=>{ if(ctx && ctx.state==='suspended') ctx.resume(); },{passive:true}));
+
+/* reveal on scroll — with a safety net so content is never left hidden
+   (headless renders and background tabs can stall a class-triggered transition) */
+(function(){
+  const els=[...document.querySelectorAll('.reveal')];
+  const showAll=()=>els.forEach(e=>e.classList.add('in'));
+  if(!('IntersectionObserver' in window)){showAll();return;}
+  const io=new IntersectionObserver((ents)=>{
+    ents.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
+  },{rootMargin:'0px 0px -8% 0px',threshold:0.08});
+  els.forEach(e=>io.observe(e));
+  setTimeout(showAll, 1600);                    // guarantee everything ends visible
+})();
+
+buildNodes();
+</script>
+</body>
+</html>
