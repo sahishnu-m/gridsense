@@ -1,4 +1,4 @@
-# GridSense — 100% local, offline dependencies
+# GridSense: 100% local, offline dependencies
 # Python 3.10+
 numpy>=1.24
 scipy>=1.10

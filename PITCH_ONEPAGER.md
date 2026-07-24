@@ -1,6 +1,6 @@
 # GridSense
 **Hear failure before it happens.**
-Acoustic predictive maintenance from any microphone — 100% offline.
+Acoustic predictive maintenance from any microphone, 100% offline.
 
 ---
 
@@ -8,7 +8,7 @@ Acoustic predictive maintenance from any microphone — 100% offline.
 Machines fail loudly long before they fail catastrophically: a bearing
 whines, a rotor wobbles, a fan grinds. Catching that early normally means
 vibration sensors and cloud analytics costing **thousands of dollars per
-machine** — out of reach for small workshops, clinics, schools, farms, and
+machine**, out of reach for small workshops, clinics, schools, farms, and
 the billions of small motors and micro-hardware devices that just run until
 they break.
 
@@ -16,27 +16,27 @@ they break.
 GridSense turns any microphone into a trained diagnostic ear. It records a
 few seconds of machine sound, runs an FFT to extract the acoustic
 fingerprint, and uses a machine-learning classifier to detect **bearing
-friction** and **mechanical imbalance** early — before either one causes a
-breakdown.
+friction** and **mechanical imbalance** early, well before either one causes
+a breakdown.
 
 | Step | What happens |
 |---|---|
-| Capture | Live mic recording or `.wav` upload — 2-3 seconds is enough |
-| Analyze | FFT / spectrogram → MFCC, spectral centroid, rolloff, ZCR, RMS |
-| Diagnose | RandomForest classifier → healthy / friction / imbalance |
+| Capture | Live mic recording or `.wav` upload. 2-3 seconds is enough |
+| Analyze | FFT / spectrogram to MFCC, spectral centroid, rolloff, ZCR, RMS |
+| Diagnose | RandomForest classifier to healthy / friction / imbalance |
 | Act | 0-100 Machine Health Index, a status badge, and a concrete next step |
 
 ## Results
 **98.3%** held-out classification accuracy. Its one miss in testing was a
-*mild* friction case read as healthy — not a random error, but the genuine
-hard problem in this space: catching a fault in its earliest, quietest
-stage. We're showing that limitation, not hiding it.
+*mild* friction case read as healthy: the genuine hard problem in this
+space, catching a fault in its earliest, quietest stage. We're being
+upfront about that limitation rather than hiding it.
 
 ## Why it's different
-- **Sensor-free** — a laptop or phone microphone, no accelerometers or proprietary hardware.
-- **Fully offline & private** — every computation runs on-device; audio never leaves it.
-- **Accessible by design** — democratizes a capability normally reserved for large industry.
-- **Honest engineering** — transparent about the model's real limitations.
+- **Sensor-free.** A laptop or phone microphone, no accelerometers or proprietary hardware.
+- **Fully offline and private.** Every computation runs on-device; audio never leaves it.
+- **Accessible by design.** Democratizes a capability normally reserved for large industry.
+- **Honest engineering.** Transparent about the model's real limitations.
 
 ## Impact
 Catching faults early extends equipment life, prevents catastrophic

@@ -1,5 +1,5 @@
 """
-features.py — single source of truth for audio feature extraction.
+features.py: single source of truth for audio feature extraction.
 
 Both train_model.py and app.py import from here so that the features used
 at training time EXACTLY match the features used at inference time.
@@ -11,7 +11,7 @@ import numpy as np
 import librosa
 
 # ---- Global audio config (keep identical everywhere) ----------------------
-SAMPLE_RATE = 22050          # Hz — librosa default, good balance for machinery
+SAMPLE_RATE = 22050          # Hz, librosa default, good balance for machinery
 N_MFCC = 20                  # number of MFCC coefficients
 DURATION = 3.0               # seconds each clip is normalised to
 

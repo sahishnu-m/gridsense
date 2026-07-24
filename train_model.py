@@ -1,5 +1,5 @@
 """
-train_model.py — train the GridSense acoustic fault classifier.
+train_model.py: train the GridSense acoustic fault classifier.
 
 Pipeline:
   1. Walk sample_data/<class>/*.wav
@@ -57,7 +57,7 @@ def build_dataset(data_dir=DATA_DIR):
 
 
 def main():
-    print("GridSense — model training\n")
+    print("GridSense: model training\n")
     print("Extracting features from local dataset...")
     X, y, labels = build_dataset()
     print(f"\nDataset: {X.shape[0]} samples x {X.shape[1]} features")

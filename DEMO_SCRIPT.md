@@ -70,10 +70,10 @@ credibility boost available and takes thirty extra seconds.)*
 
 > "On data the model had never seen before, GridSense got this right 98.3%
 > of the time. I want to be upfront about the one time it didn't: it read a
-> very early, very quiet friction case as healthy. That's not a random
-> glitch, that's the genuinely hard part of this problem, catching a fault
-> in its quietest, earliest stage. I'd rather show you that limitation than
-> hide it behind a clean-looking number."
+> very early, very quiet friction case as healthy. That's the genuinely hard
+> part of this problem: catching a fault in its quietest, earliest stage.
+> I'd rather show you that limitation than hide it behind a clean-looking
+> number."
 
 ### Scene 6 . Why it matters, and what's next (2:20-2:45)
 > *[`pitch_deck.html` slides 5-7, "why it's different" and roadmap]*

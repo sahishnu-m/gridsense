@@ -1,5 +1,5 @@
 """
-run.py — the ONLY file you need to run GridSense.
+run.py: the ONLY file you need to run GridSense.
 
     python run.py
 

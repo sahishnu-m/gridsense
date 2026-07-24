@@ -1,5 +1,5 @@
 """
-generate_synthetic_data.py — mathematically synthesise a local audio dataset.
+generate_synthetic_data.py: mathematically synthesise a local audio dataset.
 
 Creates .wav clips for three machine conditions so the whole GridSense
 pipeline can be trained and demoed WITHOUT any physical hardware:
@@ -9,7 +9,7 @@ pipeline can be trained and demoed WITHOUT any physical hardware:
   3. imbalance -> healthy hum + slow low-frequency amplitude wobble (beat)
 
 Everything is generated with numpy and written with scipy.io.wavfile.
-No downloads, no APIs — 100% offline.
+No downloads, no APIs. 100% offline.
 
 Usage:
     python generate_synthetic_data.py
@@ -57,7 +57,7 @@ def _background_noise(t, rng):
 def make_healthy(t, rng):
     """Clean hum with a low, but variable, broadband noise floor.
 
-    Real 'healthy' machines aren't silent — some run louder, and a few even
+    Real 'healthy' machines aren't silent. Some run louder, and a few even
     have a faint high-frequency tick. This overlap is what stops the model
     from being trivially perfect."""
     sig = _motor_hum(t, rng)
@@ -103,7 +103,7 @@ def make_imbalance(t, rng):
     sig = _motor_hum(t, rng)
     severity = rng.uniform(0.25, 1.0)
 
-    # Low-frequency amplitude modulation (the "wobble"), 1.5–4 Hz.
+    # Low-frequency amplitude modulation (the "wobble"), 1.5-4 Hz.
     wobble_hz = rng.uniform(1.5, 4.0)
     am = 1.0 + severity * 0.6 * np.sin(2 * np.pi * wobble_hz * t)
     sig *= am
@@ -158,6 +158,6 @@ if __name__ == "__main__":
     parser.add_argument("--output-dir", default=OUTPUT_DIR, help="output folder")
     args = parser.parse_args()
 
-    print("GridSense — synthetic dataset generator")
+    print("GridSense: synthetic dataset generator")
     print(f"Classes: {', '.join(CLASSES)}  |  {args.per_class} clips each\n")
     generate(args.per_class, args.seed, args.output_dir)

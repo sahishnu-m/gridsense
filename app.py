@@ -1,13 +1,13 @@
 """
-app.py — GridSense dashboard (Streamlit).
+app.py: GridSense dashboard (Streamlit).
 
 Design direction: a precision instrument in a dim plant room. Charcoal is
 tinted warm (OKLCH hue 18) rather than navy, and colour appears ONLY as
-machine state — the crimson that carries the brand IS the alarm colour, so
+machine state. The crimson that carries the brand IS the alarm colour, so
 identity and semantics never compete.
 
-Fonts are system stacks only (no webfonts) — the project must run fully
-offline, and a Google Fonts <link> would break that promise.
+Fonts are system stacks only (no webfonts), because the project must run
+fully offline, and a Google Fonts <link> would break that promise.
 
 Run:
     python run.py
@@ -39,7 +39,7 @@ BORDER   = "#383131"   # oklch(0.320 0.010 18)
 INK      = "#F5F3F3"   # 17.9:1 on bg
 MUTED    = "#B1A8A8"   #  8.6:1 on bg
 FAINT    = "#867E7E"   #  5.0:1 on bg
-CRITICAL = "#E93955"   #  4.9:1 on bg — in-gamut crimson
+CRITICAL = "#E93955"   #  4.9:1 on bg, in-gamut crimson
 WARNING  = "#F2B036"   # 10.4:1 on bg
 HEALTHY  = "#4FCC8D"   #  9.8:1 on bg
 
@@ -49,7 +49,7 @@ STATUS = {
     "Critical Failure": {"color": CRITICAL, "dot": "●", "label": "Critical Failure"},
 }
 
-st.set_page_config(page_title="GridSense", page_icon="🎧", layout="wide")
+st.set_page_config(page_title="GridSense", layout="wide")
 
 
 # --------------------------------------------------------------------------- #
@@ -240,10 +240,10 @@ def plain_reading(d):
         return ("This machine sounds normal. Its acoustic signature matches a healthy "
                 "motor, with energy concentrated in the expected low-frequency hum.")
     if d["predicted"] == "friction":
-        return ("GridSense hears high-frequency grinding — the signature of metal-on-metal "
+        return ("GridSense hears high-frequency grinding, the signature of metal-on-metal "
                 "bearing wear. This usually appears well before the bearing seizes.")
     if d["predicted"] == "imbalance":
-        return ("GridSense hears a slow low-frequency wobble — the signature of a rotor "
+        return ("GridSense hears a slow low-frequency wobble, the signature of a rotor "
                 "spinning off-centre, or loose mounting hardware.")
     return ("The signal is mostly nominal, but not cleanly healthy. Capture another "
             "sample to confirm whether this is a trend or a one-off.")
@@ -262,7 +262,7 @@ def recommendations(d):
     recs = []
     if d["predicted"] == "friction":
         recs.append(("Inspect and re-lubricate the bearings",
-                     f"{hf*100:.0f}% of the acoustic energy sits above 3 kHz — a grinding "
+                     f"{hf*100:.0f}% of the acoustic energy sits above 3 kHz, a grinding "
                      "signature consistent with dry or worn bearings."))
         recs.append(("Check for metal-on-metal contact",
                      "Look for scoring on the shaft and races. Replace the bearing if the "
@@ -322,7 +322,7 @@ def masthead():
     st.markdown(f"""<div class="gs-head">
   <div>
     <div class="gs-word">Grid<span>Sense</span></div>
-    <div class="gs-tag">Hear failure before it happens — acoustic predictive maintenance.</div>
+    <div class="gs-tag">Hear failure before it happens: acoustic predictive maintenance.</div>
   </div>
   <div class="gs-offline">◆ Offline · nothing leaves this device</div>
 </div>""", unsafe_allow_html=True)
@@ -343,7 +343,7 @@ def empty_state():
         'Point a microphone at a machine. Find out if it is failing.</div>'
         '<div class="gs-sub">GridSense listens to a few seconds of sound, breaks it into its '
         'frequency components, and recognises the acoustic fingerprints of bearing friction '
-        'and mechanical imbalance — faults that are audible long before they are visible.</div>',
+        'and mechanical imbalance, faults that are audible long before they are visible.</div>',
         unsafe_allow_html=True)
 
     st.markdown("""<div class="gs-steps">
@@ -357,7 +357,7 @@ def empty_state():
 
     samples = sample_files()
     if samples:
-        st.markdown('<div class="gs-h">Try it now — no recording needed</div>'
+        st.markdown('<div class="gs-h">Try it now, no recording needed</div>'
                     '<div class="gs-sub">Load a real sample from the generated dataset. '
                     'Start with a failing one to see the full diagnosis.</div>',
                     unsafe_allow_html=True)
@@ -417,7 +417,7 @@ def results(y, d, source_label):
     with left:
         st.markdown('<div class="gs-h">Signal analysis</div>'
                     '<div class="gs-sub">The waveform shows loudness over time. The spectrogram '
-                    'shows which frequencies carry the energy — bright bands high up mean '
+                    'shows which frequencies carry the energy: bright bands high up mean '
                     'grinding; a slow pulse means wobble.</div>', unsafe_allow_html=True)
         st.pyplot(plot_waveform(y, color), width="stretch")
         st.pyplot(plot_spectrogram(y), width="stretch")
@@ -487,13 +487,13 @@ if rec is not None:
     audio_bytes, source_label = rec.read(), "Live microphone recording"
     st.session_state.pop("sample", None)
 elif up is not None:
-    audio_bytes, source_label = up.read(), f"Uploaded file — {up.name}"
+    audio_bytes, source_label = up.read(), f"Uploaded file: {up.name}"
     st.session_state.pop("sample", None)
 elif st.session_state.get("sample"):
     path = st.session_state["sample"]
     with open(path, "rb") as fh:
         audio_bytes = fh.read()
-    source_label = f"Sample — {os.path.basename(path)}"
+    source_label = f"Sample: {os.path.basename(path)}"
 
 if audio_bytes is None:
     empty_state()
@@ -503,7 +503,7 @@ st.session_state["audio_bytes"] = audio_bytes
 y = decode_audio(audio_bytes)
 
 if y.size < SAMPLE_RATE // 2:
-    st.warning("That clip is under half a second — the diagnosis may be unreliable. "
-               "Aim for 2–3 seconds of steady running noise.")
+    st.warning("That clip is under half a second, so the diagnosis may be unreliable. "
+               "Aim for 2-3 seconds of steady running noise.")
 
 results(y, diagnose(y, bundle), source_label)

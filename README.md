@@ -1,6 +1,6 @@
-# 🎧 GridSense
+# GridSense
 
-**Acoustic predictive maintenance** — detect early micro-hardware and motor
+**Acoustic predictive maintenance.** Detects early micro-hardware and motor
 failures (bearing friction, mechanical imbalance) from a simple audio feed
 using **FFT signal processing + machine learning**.
 
@@ -8,7 +8,7 @@ Runs **100% locally and offline**. No cloud, no API keys, no third-party SaaS.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 GridSense/
@@ -28,13 +28,13 @@ GridSense/
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
 Python 3.10+ · Streamlit · Librosa / SciPy · Scikit-learn · Matplotlib · NumPy
 
 ---
 
-## 🚀 Setup & Run (step by step)
+## Setup & Run (step by step)
 
 ### 1. Create a virtual environment & install dependencies
 
@@ -80,20 +80,20 @@ Health Index, status badge, spectrogram, and maintenance recommendations.
 
 ---
 
-## 🏠 Interactive demo (`demo.html`)
+## Interactive demo (`demo.html`)
 
-A self-contained walkthrough — **just double-click `demo.html`**, no server, no install.
+A self-contained walkthrough. **Just double-click `demo.html`**, no server, no install.
 
 A landing page scrolls into a top-down floor plan of a house with seven running
 appliances. Click any one to hear it and see the diagnosis. Every sound is
 synthesised live in the browser with the Web Audio API, and the verdict is
-*computed* from that audio by an in-page FFT — not hardcoded. The decision
+*computed* live from that audio by an in-page FFT. The decision
 thresholds were calibrated against the same 240-clip dataset that trains the
 scikit-learn model.
 
 Two appliances are failing, three show early warnings, two are healthy.
 
-## 🖥️ Presentation
+## Presentation
 
 Preview `presentation_slides.marp.md` with the **Marp for VS Code** extension,
 or export locally with the Marp CLI:
@@ -104,7 +104,7 @@ npx @marp-team/marp-cli presentation_slides.marp.md -o slides.html
 
 ---
 
-## 🔊 The Three Conditions
+## The Three Conditions
 
 | Class       | Acoustic signature                          | Likely cause                     |
 |-------------|---------------------------------------------|----------------------------------|
@@ -114,6 +114,6 @@ npx @marp-team/marp-cli presentation_slides.marp.md -o slides.html
 
 ---
 
-## 🔒 Privacy
+## Privacy
 
 All processing happens on your machine. Captured audio never leaves the device.
