@@ -185,8 +185,17 @@ def style_plots():
 # --------------------------------------------------------------------------- #
 # Model + audio
 # --------------------------------------------------------------------------- #
-@st.cache_resource
+@st.cache_resource(show_spinner="First launch: generating sample sounds and training the model...")
 def load_model(path=MODEL_PATH):
+    # A fresh copy of the repo (for example on Streamlit Community Cloud) has
+    # no sample data or trained model, since both are in .gitignore. Build them
+    # once, exactly as the README's setup steps do.
+    if not os.path.exists(path):
+        import generate_synthetic_data
+        import train_model
+        if not sample_files():
+            generate_synthetic_data.generate()
+        train_model.main()
     return joblib.load(path) if os.path.exists(path) else None
 
 
